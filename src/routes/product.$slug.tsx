@@ -1,0 +1,205 @@
+import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { toast } from "sonner";
+import { Heart, Share2, Truck, ShieldCheck, ChevronDown } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { formatPrice } from "@/lib/format";
+import { productPrimaryImage, resolveImage } from "@/lib/product-image";
+import { useCart } from "@/lib/cart";
+import { useAuth } from "@/lib/auth";
+import { ProductCard, type ProductCardProduct } from "@/components/product-card";
+
+export const Route = createFileRoute("/product/$slug")({
+  head: ({ params }) => ({
+    meta: [
+      { title: `Product — Marchello` },
+      { property: "og:url", content: `/product/${params.slug}` },
+      { property: "og:type", content: "product" },
+    ],
+    links: [{ rel: "canonical", href: `/product/${params.slug}` }],
+  }),
+  component: ProductPage,
+});
+
+function ProductPage() {
+  const { slug } = Route.useParams();
+  const cart = useCart();
+  const { user } = useAuth();
+  const [openSpec, setOpenSpec] = useState(false);
+
+  const { data: product, isLoading, error } = useQuery({
+    queryKey: ["product", slug],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("products")
+        .select("*,category:categories(slug,name)")
+        .eq("slug", slug)
+        .eq("is_published", true)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const { data: related = [] } = useQuery({
+    enabled: !!product,
+    queryKey: ["related", product?.category_id, product?.id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("products")
+        .select("id,name,slug,price,sale_price,is_new,images,category:categories(slug,name)")
+        .eq("is_published", true)
+        .eq("category_id", product!.category_id!)
+        .neq("id", product!.id)
+        .limit(4);
+      return (data ?? []) as unknown as ProductCardProduct[];
+    },
+  });
+
+  if (isLoading) return <div className="container-luxe py-32 text-center text-white/50">Loading…</div>;
+  if (error || !product) throw notFound();
+
+  const price = Number(product.price);
+  const sale = product.sale_price ? Number(product.sale_price) : null;
+  const display = sale ?? price;
+  const img = productPrimaryImage(product as never);
+
+  const addToWishlist = async () => {
+    if (!user) {
+      toast.error("Please sign in to save favorites");
+      return;
+    }
+    const { error } = await supabase
+      .from("wishlist")
+      .insert({ user_id: user.id, product_id: product.id });
+    if (error) toast.error("Couldn't add to wishlist");
+    else toast.success("Added to wishlist");
+  };
+
+  return (
+    <>
+      <div className="container-luxe py-10 md:py-16">
+        <nav className="text-xs text-white/40 tracking-widest uppercase mb-6">
+          <Link to="/" className="hover:text-gold">Home</Link>
+          <span className="mx-2">/</span>
+          {product.category && (
+            <>
+              <Link to="/category/$slug" params={{ slug: product.category.slug }} className="hover:text-gold">
+                {product.category.name}
+              </Link>
+              <span className="mx-2">/</span>
+            </>
+          )}
+          <span className="text-white/70">{product.name}</span>
+        </nav>
+
+        <div className="grid md:grid-cols-2 gap-10 lg:gap-16">
+          <div className="space-y-4">
+            <div className="aspect-square bg-[var(--ink)] overflow-hidden">
+              <img src={img} alt={product.name} className="h-full w-full object-cover" />
+            </div>
+            <div className="grid grid-cols-4 gap-2">
+              {(Array.isArray(product.images) ? (product.images as string[]) : []).slice(0, 4).map((src, i) => (
+                <div key={i} className="aspect-square bg-[var(--ink)] overflow-hidden">
+                  <img src={resolveImage(src)} alt="" className="h-full w-full object-cover" />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            {product.category && (
+              <div className="text-[10px] tracking-[0.3em] uppercase text-gold">{product.category.name}</div>
+            )}
+            <h1 className="font-display text-4xl md:text-5xl mt-2">{product.name}</h1>
+            <div className="mt-5 flex items-baseline gap-3">
+              <span className="font-display text-3xl text-gold">{formatPrice(display)}</span>
+              {sale && <span className="text-white/40 line-through">{formatPrice(price)}</span>}
+            </div>
+
+            <p className="mt-6 text-white/70 leading-relaxed">{product.description}</p>
+
+            <div className="mt-8 flex gap-3">
+              <button
+                onClick={() => {
+                  cart.add({
+                    id: product.id,
+                    slug: product.slug,
+                    name: product.name,
+                    price: display,
+                    image: img,
+                  });
+                  toast.success("Added to bag");
+                }}
+                disabled={product.stock <= 0}
+                className="btn-gold flex-1 disabled:opacity-40"
+              >
+                {product.stock > 0 ? "Add to Bag" : "Out of Stock"}
+              </button>
+              <button onClick={addToWishlist} className="btn-ghost-gold !px-4" aria-label="Wishlist">
+                <Heart className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => {
+                  if (typeof navigator !== "undefined" && navigator.share) {
+                    navigator.share({ title: product.name, url: window.location.href }).catch(() => {});
+                  } else if (typeof navigator !== "undefined") {
+                    navigator.clipboard?.writeText(window.location.href);
+                    toast.success("Link copied");
+                  }
+                }}
+                className="btn-ghost-gold !px-4" aria-label="Share"
+              >
+                <Share2 className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="mt-8 grid grid-cols-2 gap-4 text-sm">
+              <div className="flex items-center gap-3"><Truck className="h-4 w-4 text-gold" /> Free worldwide over $500</div>
+              <div className="flex items-center gap-3"><ShieldCheck className="h-4 w-4 text-gold" /> Lifetime warranty</div>
+            </div>
+
+            <div className="mt-10 border-t border-white/10">
+              <button onClick={() => setOpenSpec((v) => !v)} className="w-full py-5 flex justify-between items-center">
+                <span className="eyebrow">Specifications</span>
+                <ChevronDown className={`h-4 w-4 transition-transform ${openSpec ? "rotate-180" : ""}`} />
+              </button>
+              {openSpec && (
+                <dl className="pb-6 space-y-2 text-sm text-white/70">
+                  {product.material && <Row k="Material" v={product.material} />}
+                  {product.gold_type && <Row k="Gold Type" v={product.gold_type} />}
+                  {product.diamond_carat && <Row k="Diamond Weight" v={`${product.diamond_carat} ct`} />}
+                  {product.weight && <Row k="Weight" v={`${product.weight} g`} />}
+                  {product.gender && <Row k="Designed For" v={product.gender} />}
+                  <Row k="SKU" v={product.sku ?? product.slug} />
+                </dl>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {related.length > 0 && (
+          <section className="mt-24">
+            <div className="text-center mb-10">
+              <div className="eyebrow">You may also love</div>
+              <h2 className="font-display text-3xl mt-3">Related Pieces</h2>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
+              {related.map((p) => <ProductCard key={p.id} p={p} />)}
+            </div>
+          </section>
+        )}
+      </div>
+    </>
+  );
+}
+
+function Row({ k, v }: { k: string; v: string }) {
+  return (
+    <div className="flex justify-between border-b border-white/5 py-2">
+      <dt className="text-white/40 uppercase tracking-widest text-xs">{k}</dt>
+      <dd>{v}</dd>
+    </div>
+  );
+}
