@@ -111,10 +111,11 @@ function AccountPage() {
             wishlist.length === 0 ? <Empty msg="Your wishlist is empty" cta /> :
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {wishlist.map((w) => {
-                const p = (w as { product: never }).product as { id: string; name: string; slug: string; price: number; sale_price: number | null; images: unknown; category: { slug: string; name: string } | null } | null;
+                const row = w as unknown as { id: string; product: { id: string; name: string; slug: string; price: number; sale_price: number | null; images: unknown; category: { slug: string; name: string } | null } | null };
+                const p = row.product;
                 if (!p) return null;
                 return (
-                  <Link key={(w as { id: string }).id} to="/product/$slug" params={{ slug: p.slug }} className="block group">
+                  <Link key={row.id} to="/product/$slug" params={{ slug: p.slug }} className="block group">
                     <div className="aspect-[4/5] bg-[var(--ink)] overflow-hidden">
                       <img src={productPrimaryImage(p)} alt={p.name} className="h-full w-full object-cover group-hover:scale-105 transition-transform" />
                     </div>
