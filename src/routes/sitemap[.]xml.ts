@@ -32,13 +32,12 @@ export const Route = createFileRoute("/sitemap.xml")({
         try {
           const { data: cats } = await supabase
             .from("categories")
-            .select("slug,updated_at");
-          for (const c of cats ?? []) {
+            .select("slug");
+          for (const c of (cats ?? []) as Array<{ slug: string }>) {
             entries.push({
               path: `/category/${c.slug}`,
               changefreq: "weekly",
               priority: "0.8",
-              lastmod: (c as { updated_at?: string }).updated_at?.slice(0, 10),
             });
           }
 
@@ -46,12 +45,12 @@ export const Route = createFileRoute("/sitemap.xml")({
             .from("products")
             .select("slug,updated_at")
             .eq("is_published", true);
-          for (const p of products ?? []) {
+          for (const p of (products ?? []) as Array<{ slug: string; updated_at?: string }>) {
             entries.push({
               path: `/product/${p.slug}`,
               changefreq: "weekly",
               priority: "0.7",
-              lastmod: (p as { updated_at?: string }).updated_at?.slice(0, 10),
+              lastmod: p.updated_at?.slice(0, 10),
             });
           }
         } catch {
