@@ -74,7 +74,7 @@ function HomePage() {
               Crafted in <span className="gold-gradient">solid gold.</span><br/>
               Set with brilliance.
             </h1>
-            <p className="mt-6 text-white/70 max-w-md text-lg">
+            <p className="mt-6 text-foreground/70 max-w-md text-lg">
               Iconic pieces designed for those who appreciate the difference.
               Hand-finished by master jewelers, ethically sourced diamonds.
             </p>
@@ -145,7 +145,7 @@ function HomePage() {
             <div key={t} className="flex flex-col items-center">
               <Icon className="h-8 w-8 text-gold mb-3" />
               <div className="font-display text-lg">{t}</div>
-              <div className="text-xs text-white/50 mt-1">{d}</div>
+              <div className="text-xs text-foreground/50 mt-1">{d}</div>
             </div>
           ))}
         </div>
@@ -205,7 +205,7 @@ function HomePage() {
         <h2 className="font-display text-4xl md:text-5xl mt-3 max-w-2xl mx-auto">
           Be first to see new releases.
         </h2>
-        <p className="mt-4 text-white/60 max-w-lg mx-auto">
+        <p className="mt-4 text-foreground/60 max-w-lg mx-auto">
           Join the Marchello list for private previews, atelier stories, and 10% off your first piece.
         </p>
         <form

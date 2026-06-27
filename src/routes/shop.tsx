@@ -76,7 +76,7 @@ export function Shop({ categorySlug }: { categorySlug?: string } = {}) {
         <h1 className="font-display text-4xl md:text-5xl mt-3">
           {categorySlug ? cats.find((c) => c.slug === categorySlug)?.name ?? "Shop" : "Shop All"}
         </h1>
-        <p className="mt-3 text-white/60 max-w-xl mx-auto">
+        <p className="mt-3 text-foreground/60 max-w-xl mx-auto">
           {filtered.length} {filtered.length === 1 ? "piece" : "pieces"} available
         </p>
       </div>
@@ -154,7 +154,7 @@ export function Shop({ categorySlug }: { categorySlug?: string } = {}) {
               ))}
             </div>
           ) : filtered.length === 0 ? (
-            <div className="text-center py-20 text-white/50">No pieces match these filters.</div>
+            <div className="text-center py-20 text-foreground/50">No pieces match these filters.</div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-8">
               {filtered.map((p) => <ProductCard key={p.id} p={p} />)}

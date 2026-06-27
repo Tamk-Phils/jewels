@@ -40,17 +40,17 @@ export function ProductCard({ p }: { p: ProductCardProduct }) {
       </div>
       <div className="pt-4">
         {p.category?.name && (
-          <div className="text-[10px] tracking-[0.25em] uppercase text-white/40">{p.category.name}</div>
+          <div className="text-[10px] tracking-[0.25em] uppercase text-foreground/40">{p.category.name}</div>
         )}
         <h3 className="font-display text-lg mt-1 group-hover:text-gold transition-colors">{p.name}</h3>
         <div className="mt-1 text-sm flex items-baseline gap-2">
           {sale ? (
             <>
               <span className="text-gold">{formatPrice(sale)}</span>
-              <span className="text-white/40 line-through text-xs">{formatPrice(price)}</span>
+              <span className="text-foreground/40 line-through text-xs">{formatPrice(price)}</span>
             </>
           ) : (
-            <span className="text-white/80">{formatPrice(price)}</span>
+            <span className="text-foreground/80">{formatPrice(price)}</span>
           )}
         </div>
       </div>

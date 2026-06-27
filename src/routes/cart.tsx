@@ -21,7 +21,7 @@ function CartPage() {
     return (
       <div className="container-luxe py-32 text-center">
         <h1 className="font-display text-4xl">Your bag is empty</h1>
-        <p className="mt-3 text-white/60">Discover hand-crafted pieces made to last a lifetime.</p>
+        <p className="mt-3 text-foreground/60">Discover hand-crafted pieces made to last a lifetime.</p>
         <Link to="/shop" className="btn-gold mt-8">Shop the Collection</Link>
       </div>
     );
@@ -39,14 +39,14 @@ function CartPage() {
               </Link>
               <div className="flex-1">
                 <Link to="/product/$slug" params={{ slug: i.slug }} className="font-display text-lg hover:text-gold">{i.name}</Link>
-                <div className="mt-1 text-sm text-white/60">{formatPrice(i.price)}</div>
+                <div className="mt-1 text-sm text-foreground/60">{formatPrice(i.price)}</div>
                 <div className="mt-4 flex items-center gap-3">
                   <div className="inline-flex items-center border border-white/20">
                     <button onClick={() => setQty(i.id, i.quantity - 1)} className="p-2"><Minus className="h-3 w-3" /></button>
                     <span className="px-3 text-sm">{i.quantity}</span>
                     <button onClick={() => setQty(i.id, i.quantity + 1)} className="p-2"><Plus className="h-3 w-3" /></button>
                   </div>
-                  <button onClick={() => remove(i.id)} className="text-white/40 hover:text-gold p-2" aria-label="Remove">
+                  <button onClick={() => remove(i.id)} className="text-foreground/40 hover:text-gold p-2" aria-label="Remove">
                     <Trash2 className="h-4 w-4" />
                   </button>
                 </div>
@@ -84,7 +84,7 @@ function CartPage() {
             <span>Total</span><span className="text-gold">{formatPrice(total)}</span>
           </div>
           <Link to="/checkout" className="btn-gold w-full">Checkout</Link>
-          <Link to="/shop" className="block text-center text-xs uppercase tracking-[0.2em] text-white/60 hover:text-gold">
+          <Link to="/shop" className="block text-center text-xs uppercase tracking-[0.2em] text-foreground/60 hover:text-gold">
             Continue Shopping
           </Link>
         </aside>
@@ -94,5 +94,5 @@ function CartPage() {
 }
 
 function Row({ k, v }: { k: string; v: string }) {
-  return <div className="flex justify-between text-sm"><span className="text-white/60">{k}</span><span>{v}</span></div>;
+  return <div className="flex justify-between text-sm"><span className="text-foreground/60">{k}</span><span>{v}</span></div>;
 }

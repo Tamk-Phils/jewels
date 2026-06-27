@@ -85,7 +85,7 @@ function CheckoutPage() {
       <h1 className="font-display text-4xl md:text-5xl text-center mb-8">Checkout</h1>
       <div className="flex justify-center mb-12 gap-4 md:gap-10 text-[10px] md:text-xs uppercase tracking-[0.25em]">
         {["Shipping","Billing","Payment","Confirm"].map((s, i) => (
-          <div key={s} className={`flex items-center gap-2 ${step >= (i+1) ? "text-gold" : "text-white/40"}`}>
+          <div key={s} className={`flex items-center gap-2 ${step >= (i+1) ? "text-gold" : "text-foreground/40"}`}>
             <span className={`h-6 w-6 rounded-full border flex items-center justify-center ${step >= (i+1) ? "border-[var(--gold)]" : "border-white/30"}`}>{i+1}</span>
             <span className="hidden md:inline">{s}</span>
           </div>
@@ -116,7 +116,7 @@ function CheckoutPage() {
           )}
           {step === 2 && (
             <Fieldset title="Billing Address">
-              <p className="text-sm text-white/60 mb-4">Using same as shipping address.</p>
+              <p className="text-sm text-foreground/60 mb-4">Using same as shipping address.</p>
               <div className="flex gap-3">
                 <button className="btn-ghost-gold" onClick={() => setStep(1)}>Back</button>
                 <button className="btn-gold" onClick={() => setStep(3)}>Continue</button>
@@ -137,12 +137,12 @@ function CheckoutPage() {
                       onChange={() => setForm({ ...form, payment_method: m.id })} className="accent-[var(--gold)]" />
                     <div>
                       <div className="font-medium">{m.label}</div>
-                      <div className="text-xs text-white/50">{m.note}</div>
+                      <div className="text-xs text-foreground/50">{m.note}</div>
                     </div>
                   </div>
                 </label>
               ))}
-              <p className="text-xs text-white/40 mt-4">
+              <p className="text-xs text-foreground/40 mt-4">
                 Live payment processing will be enabled in the next phase. For now, your order is recorded as "pending".
               </p>
               <div className="flex gap-3 mt-4">
@@ -157,7 +157,7 @@ function CheckoutPage() {
             <div className="text-center py-16 glass p-10">
               <div className="eyebrow">Thank you</div>
               <h2 className="font-display text-3xl mt-2">Order received</h2>
-              <p className="mt-3 text-white/60">A confirmation has been sent to your email.</p>
+              <p className="mt-3 text-foreground/60">A confirmation has been sent to your email.</p>
               <Link to="/account" className="btn-gold mt-8 inline-flex">View Orders</Link>
             </div>
           )}
@@ -167,7 +167,7 @@ function CheckoutPage() {
           <div className="eyebrow mb-2">Your Order</div>
           {items.map((i) => (
             <div key={i.id} className="flex justify-between gap-2">
-              <span className="text-white/70">{i.name} × {i.quantity}</span>
+              <span className="text-foreground/70">{i.name} × {i.quantity}</span>
               <span>{formatPrice(i.price * i.quantity)}</span>
             </div>
           ))}
@@ -196,12 +196,12 @@ function Fieldset({ title, children }: { title: string; children: React.ReactNod
 function Field({ label, v, on }: { label: string; v: string; on: (v: string) => void }) {
   return (
     <label className="block">
-      <span className="text-[10px] uppercase tracking-[0.2em] text-white/50">{label}</span>
+      <span className="text-[10px] uppercase tracking-[0.2em] text-foreground/50">{label}</span>
       <input value={v} onChange={(e) => on(e.target.value)}
         className="w-full bg-transparent border border-white/15 px-3 py-2 mt-1 focus:border-[var(--gold)] focus:outline-none" />
     </label>
   );
 }
 function Row({ k, v }: { k: string; v: string }) {
-  return <div className="flex justify-between"><span className="text-white/60">{k}</span><span>{v}</span></div>;
+  return <div className="flex justify-between"><span className="text-foreground/60">{k}</span><span>{v}</span></div>;
 }

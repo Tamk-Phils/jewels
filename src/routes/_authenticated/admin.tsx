@@ -42,13 +42,13 @@ function AdminPage() {
     },
   });
 
-  if (isAdmin === null) return <div className="container-luxe py-20 text-center text-white/50">Loading…</div>;
+  if (isAdmin === null) return <div className="container-luxe py-20 text-center text-foreground/50">Loading…</div>;
   if (isAdmin === false) {
     return (
       <div className="container-luxe py-20 text-center">
         <h1 className="font-display text-3xl">Access restricted</h1>
-        <p className="mt-3 text-white/60">You need administrator privileges to view this page.</p>
-        <p className="mt-2 text-xs text-white/40">
+        <p className="mt-3 text-foreground/60">You need administrator privileges to view this page.</p>
+        <p className="mt-2 text-xs text-foreground/40">
           Grant the admin role to your user via Lovable Cloud → SQL editor:<br/>
           <code className="text-gold">INSERT INTO public.user_roles (user_id, role) VALUES ('{user?.id}', 'admin');</code>
         </p>
@@ -73,7 +73,7 @@ function AdminPage() {
         <h2 className="font-display text-2xl mb-4">Recent Orders</h2>
         <div className="glass overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="text-left text-[10px] uppercase tracking-[0.2em] text-white/50">
+            <thead className="text-left text-[10px] uppercase tracking-[0.2em] text-foreground/50">
               <tr>{["Order","Total","Status","Date"].map((h) => <th key={h} className="p-4">{h}</th>)}</tr>
             </thead>
             <tbody>
@@ -82,7 +82,7 @@ function AdminPage() {
                   <td className="p-4 font-mono text-gold">{o.order_number}</td>
                   <td className="p-4">{formatPrice(o.total_amount)}</td>
                   <td className="p-4 capitalize">{o.status}</td>
-                  <td className="p-4 text-white/60">{new Date(o.created_at).toLocaleDateString()}</td>
+                  <td className="p-4 text-foreground/60">{new Date(o.created_at).toLocaleDateString()}</td>
                 </tr>
               ))}
             </tbody>
@@ -94,7 +94,7 @@ function AdminPage() {
         <h2 className="font-display text-2xl mb-4">Products</h2>
         <div className="glass overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="text-left text-[10px] uppercase tracking-[0.2em] text-white/50">
+            <thead className="text-left text-[10px] uppercase tracking-[0.2em] text-foreground/50">
               <tr>{["Name","Price","Stock","Published"].map((h) => <th key={h} className="p-4">{h}</th>)}</tr>
             </thead>
             <tbody>
@@ -109,7 +109,7 @@ function AdminPage() {
             </tbody>
           </table>
         </div>
-        <p className="mt-4 text-xs text-white/40">Full CRUD (create/edit/delete) ships in the next phase.</p>
+        <p className="mt-4 text-xs text-foreground/40">Full CRUD (create/edit/delete) ships in the next phase.</p>
       </section>
     </div>
   );

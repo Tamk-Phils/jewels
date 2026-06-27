@@ -35,7 +35,7 @@ export function SiteHeader() {
           MARCHELLO<span className="text-gold">.</span>
         </Link>
 
-        <nav className="hidden md:flex items-center gap-7 text-[11px] uppercase tracking-[0.22em] text-white/80">
+        <nav className="hidden md:flex items-center gap-7 text-[11px] uppercase tracking-[0.22em] text-foreground/80">
           {nav.slice(0, 5).map((n) => (
             <Link key={n.to} to={n.to} className="hover:text-gold transition-colors">
               {n.label}
@@ -62,7 +62,7 @@ export function SiteHeader() {
       </div>
 
       {open && (
-        <div className="fixed inset-0 z-50 bg-black md:hidden animate-fade-up">
+        <div className="fixed inset-0 z-50 bg-background md:hidden animate-fade-up">
           <div className="container-luxe flex items-center justify-between h-16">
             <Link to="/" onClick={() => setOpen(false)} className="font-display text-2xl">
               MARCHELLO<span className="text-gold">.</span>

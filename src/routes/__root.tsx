@@ -19,11 +19,11 @@ import { AuthProvider } from "@/lib/auth";
 
 function NotFoundComponent() {
   return (
-    <div className="flex min-h-screen items-center justify-center px-4 bg-black">
+    <div className="flex min-h-screen items-center justify-center px-4 bg-background">
       <div className="max-w-md text-center">
         <h1 className="font-display text-7xl text-gold">404</h1>
         <h2 className="mt-4 font-display text-2xl">Page not found</h2>
-        <p className="mt-3 text-sm text-white/60">
+        <p className="mt-3 text-sm text-foreground/60">
           The page you're looking for doesn't exist or has been moved.
         </p>
         <Link to="/" className="btn-gold mt-8">Return Home</Link>
@@ -39,10 +39,10 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
     reportLovableError(error, { boundary: "tanstack_root_error_component" });
   }, [error]);
   return (
-    <div className="flex min-h-screen items-center justify-center px-4 bg-black">
+    <div className="flex min-h-screen items-center justify-center px-4 bg-background">
       <div className="max-w-md text-center">
         <h1 className="font-display text-2xl">Something went wrong</h1>
-        <p className="mt-3 text-sm text-white/60">An unexpected error occurred.</p>
+        <p className="mt-3 text-sm text-foreground/60">An unexpected error occurred.</p>
         <div className="mt-8 flex justify-center gap-3">
           <button onClick={() => { router.invalidate(); reset(); }} className="btn-gold">Try again</button>
           <a href="/" className="btn-ghost-gold">Home</a>
@@ -86,7 +86,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en">
       <head><HeadContent /></head>
       <body>
         {children}
@@ -102,12 +102,12 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <CartProvider>
-          <div className="min-h-screen flex flex-col bg-black text-white">
+          <div className="min-h-screen flex flex-col bg-background text-foreground">
             <SiteHeader />
             <main className="flex-1"><Outlet /></main>
             <SiteFooter />
           </div>
-          <Toaster theme="dark" position="bottom-right" />
+          <Toaster theme="light" position="bottom-right" />
         </CartProvider>
       </AuthProvider>
     </QueryClientProvider>
