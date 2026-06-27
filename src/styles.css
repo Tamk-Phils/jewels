@@ -44,40 +44,34 @@
 :root {
   --radius: 0.25rem;
 
-  /* Luxury dark palette */
-  --background: oklch(0 0 0);              /* #000 */
-  --foreground: oklch(0.985 0 0);          /* near white */
-  --ink: oklch(0.18 0 0);                  /* #1A1A1A */
+  /* Luxury light palette — warm cream + deep ink + gold */
+  --background: oklch(0.985 0.005 85);
+  --foreground: oklch(0.18 0.01 60);
+  --ink: oklch(0.96 0.008 85);
 
-  --card: oklch(0.13 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.13 0 0);
-  --popover-foreground: oklch(0.985 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: var(--foreground);
+  --popover: oklch(1 0 0);
+  --popover-foreground: var(--foreground);
 
-  --gold: oklch(0.78 0.13 85);             /* ~ #D4AF37 */
-  --gold-soft: oklch(0.7 0.1 85);
+  --gold: oklch(0.62 0.13 75);
+  --gold-soft: oklch(0.78 0.11 85);
 
   --primary: var(--gold);
-  --primary-foreground: oklch(0 0 0);
+  --primary-foreground: oklch(1 0 0);
 
-  --secondary: oklch(0.18 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.18 0 0);
-  --muted-foreground: oklch(0.7 0 0);
-  --accent: oklch(0.22 0 0);
-  --accent-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.94 0.008 85);
+  --secondary-foreground: var(--foreground);
+  --muted: oklch(0.94 0.008 85);
+  --muted-foreground: oklch(0.45 0.01 60);
+  --accent: oklch(0.92 0.015 85);
+  --accent-foreground: var(--foreground);
   --destructive: oklch(0.58 0.22 27);
   --destructive-foreground: oklch(0.985 0 0);
 
-  --border: oklch(1 0 0 / 12%);
-  --input: oklch(1 0 0 / 14%);
+  --border: oklch(0.18 0.01 60 / 14%);
+  --input: oklch(0.18 0.01 60 / 16%);
   --ring: var(--gold);
-}
-
-.dark {
-  /* same — luxury site is always dark */
-  --background: oklch(0 0 0);
-  --foreground: oklch(0.985 0 0);
 }
 
 @layer base {
