@@ -44,7 +44,7 @@ function FAQPage() {
               <span className="font-display text-xl">{f.q}</span>
               <ChevronDown className={`h-4 w-4 transition-transform ${open === i ? "rotate-180" : ""}`} />
             </button>
-            {open === i && <p className="pb-6 text-white/70 leading-relaxed">{f.a}</p>}
+            {open === i && <p className="pb-6 text-foreground/70 leading-relaxed">{f.a}</p>}
           </div>
         ))}
       </div>

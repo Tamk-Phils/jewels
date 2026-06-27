@@ -23,8 +23,8 @@ function ContactPage() {
       <div>
         <div className="eyebrow">Get in touch</div>
         <h1 className="font-display text-5xl mt-3">Concierge</h1>
-        <p className="mt-6 text-white/70 leading-relaxed">Personalized service. We respond within 24 hours.</p>
-        <ul className="mt-10 space-y-4 text-sm text-white/70">
+        <p className="mt-6 text-foreground/70 leading-relaxed">Personalized service. We respond within 24 hours.</p>
+        <ul className="mt-10 space-y-4 text-sm text-foreground/70">
           <li className="flex gap-3"><Mail className="h-4 w-4 text-gold mt-0.5" /> concierge@marchello.example</li>
           <li className="flex gap-3"><Phone className="h-4 w-4 text-gold mt-0.5" /> +1 (212) 555-0199</li>
           <li className="flex gap-3"><MapPin className="h-4 w-4 text-gold mt-0.5" /> 5th Avenue, New York</li>

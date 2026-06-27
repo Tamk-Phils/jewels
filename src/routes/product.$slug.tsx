@@ -57,7 +57,7 @@ function ProductPage() {
     },
   });
 
-  if (isLoading) return <div className="container-luxe py-32 text-center text-white/50">Loading…</div>;
+  if (isLoading) return <div className="container-luxe py-32 text-center text-foreground/50">Loading…</div>;
   if (error || !product) throw notFound();
 
   const price = Number(product.price);
@@ -80,7 +80,7 @@ function ProductPage() {
   return (
     <>
       <div className="container-luxe py-10 md:py-16">
-        <nav className="text-xs text-white/40 tracking-widest uppercase mb-6">
+        <nav className="text-xs text-foreground/40 tracking-widest uppercase mb-6">
           <Link to="/" className="hover:text-gold">Home</Link>
           <span className="mx-2">/</span>
           {product.category && (
@@ -91,7 +91,7 @@ function ProductPage() {
               <span className="mx-2">/</span>
             </>
           )}
-          <span className="text-white/70">{product.name}</span>
+          <span className="text-foreground/70">{product.name}</span>
         </nav>
 
         <div className="grid md:grid-cols-2 gap-10 lg:gap-16">
@@ -115,10 +115,10 @@ function ProductPage() {
             <h1 className="font-display text-4xl md:text-5xl mt-2">{product.name}</h1>
             <div className="mt-5 flex items-baseline gap-3">
               <span className="font-display text-3xl text-gold">{formatPrice(display)}</span>
-              {sale && <span className="text-white/40 line-through">{formatPrice(price)}</span>}
+              {sale && <span className="text-foreground/40 line-through">{formatPrice(price)}</span>}
             </div>
 
-            <p className="mt-6 text-white/70 leading-relaxed">{product.description}</p>
+            <p className="mt-6 text-foreground/70 leading-relaxed">{product.description}</p>
 
             <div className="mt-8 flex gap-3">
               <button
@@ -166,7 +166,7 @@ function ProductPage() {
                 <ChevronDown className={`h-4 w-4 transition-transform ${openSpec ? "rotate-180" : ""}`} />
               </button>
               {openSpec && (
-                <dl className="pb-6 space-y-2 text-sm text-white/70">
+                <dl className="pb-6 space-y-2 text-sm text-foreground/70">
                   {product.material && <Row k="Material" v={product.material} />}
                   {product.gold_type && <Row k="Gold Type" v={product.gold_type} />}
                   {product.diamond_carat && <Row k="Diamond Weight" v={`${product.diamond_carat} ct`} />}
@@ -198,7 +198,7 @@ function ProductPage() {
 function Row({ k, v }: { k: string; v: string }) {
   return (
     <div className="flex justify-between border-b border-white/5 py-2">
-      <dt className="text-white/40 uppercase tracking-widest text-xs">{k}</dt>
+      <dt className="text-foreground/40 uppercase tracking-widest text-xs">{k}</dt>
       <dd>{v}</dd>
     </div>
   );

@@ -14,7 +14,7 @@ export const Route = createFileRoute("/privacy")({
     <div className="container-luxe py-20 max-w-3xl">
       <div className="eyebrow">Legal</div>
       <h1 className="font-display text-5xl mt-3">Privacy Policy</h1>
-      <div className="mt-10 space-y-6 text-white/70 leading-relaxed">
+      <div className="mt-10 space-y-6 text-foreground/70 leading-relaxed">
         <p>This page describes how we collect, use, and protect your personal information when you visit our site or purchase from us.</p>
         <p>We collect the information you provide at checkout (name, address, email) and basic device data for analytics. We do not sell your data to third parties.</p>
         <p>Payments are processed by our PCI-compliant payment providers; we do not store full card details on our servers.</p>

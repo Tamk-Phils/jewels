@@ -14,7 +14,7 @@ export const Route = createFileRoute("/terms")({
     <div className="container-luxe py-20 max-w-3xl">
       <div className="eyebrow">Legal</div>
       <h1 className="font-display text-5xl mt-3">Terms & Conditions</h1>
-      <div className="mt-10 space-y-6 text-white/70 leading-relaxed">
+      <div className="mt-10 space-y-6 text-foreground/70 leading-relaxed">
         <p>By accessing or using the Marchello site, you agree to these terms.</p>
         <p>All product imagery is for reference; natural variation in gold finish and diamond brilliance is expected.</p>
         <p>Pricing and availability are subject to change without notice. We reserve the right to refuse or cancel orders.</p>

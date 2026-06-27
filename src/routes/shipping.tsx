@@ -14,10 +14,10 @@ const make = (slug: string, title: string, body: { h: string; p: string }[]) => 
     <div className="container-luxe py-20 max-w-3xl">
       <div className="eyebrow">Policy</div>
       <h1 className="font-display text-5xl mt-3">{title}</h1>
-      <div className="mt-10 space-y-8 text-white/70 leading-relaxed">
+      <div className="mt-10 space-y-8 text-foreground/70 leading-relaxed">
         {body.map((s, i) => (
           <section key={i}>
-            <h2 className="font-display text-2xl text-white">{s.h}</h2>
+            <h2 className="font-display text-2xl text-foreground">{s.h}</h2>
             <p className="mt-3">{s.p}</p>
           </section>
         ))}

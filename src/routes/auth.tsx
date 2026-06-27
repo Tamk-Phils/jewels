@@ -84,7 +84,7 @@ function AuthPage() {
           <button onClick={google} disabled={busy} className="btn-ghost-gold w-full">
             Continue with Google
           </button>
-          <div className="my-6 flex items-center gap-3 text-xs text-white/40">
+          <div className="my-6 flex items-center gap-3 text-xs text-foreground/40">
             <div className="flex-1 h-px bg-white/10" /> OR <div className="flex-1 h-px bg-white/10" />
           </div>
         </>
@@ -105,7 +105,7 @@ function AuthPage() {
         </button>
       </form>
 
-      <div className="mt-6 text-center text-sm text-white/60 space-y-2">
+      <div className="mt-6 text-center text-sm text-foreground/60 space-y-2">
         {mode === "signin" && (
           <>
             <div>

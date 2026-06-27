@@ -35,7 +35,7 @@ export function SiteHeader() {
           MARCHELLO<span className="text-gold">.</span>
         </Link>
 
-        <nav className="hidden md:flex items-center gap-7 text-[11px] uppercase tracking-[0.22em] text-white/80">
+        <nav className="hidden md:flex items-center gap-7 text-[11px] uppercase tracking-[0.22em] text-foreground/80">
           {nav.slice(0, 5).map((n) => (
             <Link key={n.to} to={n.to} className="hover:text-gold transition-colors">
               {n.label}

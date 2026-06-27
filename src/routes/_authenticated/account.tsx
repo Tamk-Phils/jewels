@@ -68,7 +68,7 @@ function AccountPage() {
         <nav className="flex md:flex-col gap-1 overflow-x-auto">
           {(["overview","orders","wishlist","addresses","profile"] as Tab[]).map((t) => (
             <button key={t} onClick={() => setTab(t)}
-              className={`text-left px-4 py-3 text-sm uppercase tracking-[0.2em] border-l-2 transition ${tab === t ? "border-[var(--gold)] text-gold bg-white/5" : "border-transparent text-white/60 hover:text-white"}`}
+              className={`text-left px-4 py-3 text-sm uppercase tracking-[0.2em] border-l-2 transition ${tab === t ? "border-[var(--gold)] text-gold bg-white/5" : "border-transparent text-foreground/60 hover:text-foreground"}`}
             >{t}</button>
           ))}
         </nav>
@@ -90,14 +90,14 @@ function AccountPage() {
                   <div className="flex justify-between flex-wrap gap-2">
                     <div>
                       <div className="font-display text-lg">{o.order_number}</div>
-                      <div className="text-xs text-white/50">{new Date(o.created_at).toLocaleDateString()}</div>
+                      <div className="text-xs text-foreground/50">{new Date(o.created_at).toLocaleDateString()}</div>
                     </div>
                     <div className="text-right">
                       <div className="text-gold">{formatPrice(o.total_amount)}</div>
-                      <div className="text-[10px] uppercase tracking-[0.2em] text-white/50">{o.status}</div>
+                      <div className="text-[10px] uppercase tracking-[0.2em] text-foreground/50">{o.status}</div>
                     </div>
                   </div>
-                  <div className="mt-3 text-sm text-white/60">
+                  <div className="mt-3 text-sm text-foreground/60">
                     {(o.order_items as { product_name: string; quantity: number }[] | null)?.map((it, i) => (
                       <div key={i}>{it.quantity} × {it.product_name}</div>
                     ))}
@@ -121,7 +121,7 @@ function AccountPage() {
                     </div>
                     <div className="pt-3 text-sm">
                       <div className="font-display group-hover:text-gold">{p.name}</div>
-                      <div className="text-white/60">{formatPrice(p.sale_price ?? p.price)}</div>
+                      <div className="text-foreground/60">{formatPrice(p.sale_price ?? p.price)}</div>
                     </div>
                   </Link>
                 );
@@ -136,9 +136,9 @@ function AccountPage() {
                   {addresses.map((a) => (
                     <li key={a.id} className="glass p-5 text-sm">
                       <div className="font-display text-lg">{a.full_name}</div>
-                      <div className="text-white/60 mt-1">{a.line1}{a.line2 ? `, ${a.line2}` : ""}</div>
-                      <div className="text-white/60">{a.city}, {a.state} {a.postal_code}</div>
-                      <div className="text-white/60">{a.country}</div>
+                      <div className="text-foreground/60 mt-1">{a.line1}{a.line2 ? `, ${a.line2}` : ""}</div>
+                      <div className="text-foreground/60">{a.city}, {a.state} {a.postal_code}</div>
+                      <div className="text-foreground/60">{a.country}</div>
                     </li>
                   ))}
                 </ul>
@@ -161,7 +161,7 @@ function Stat({ label, value }: { label: string; value: string }) {
 }
 function Empty({ msg, cta }: { msg: string; cta?: boolean }) {
   return (
-    <div className="text-center py-16 text-white/50">
+    <div className="text-center py-16 text-foreground/50">
       <p>{msg}</p>
       {cta && <Link to="/shop" className="btn-gold mt-6 inline-flex">Browse Collection</Link>}
     </div>
@@ -183,15 +183,15 @@ function ProfileForm({ profile, userEmail }: { profile: { full_name?: string | n
   return (
     <div className="max-w-lg space-y-4">
       <label className="block">
-        <span className="text-[10px] uppercase tracking-[0.2em] text-white/50">Full Name</span>
+        <span className="text-[10px] uppercase tracking-[0.2em] text-foreground/50">Full Name</span>
         <input value={name} onChange={(e) => setName(e.target.value)} className="auth-input" />
       </label>
       <label className="block">
-        <span className="text-[10px] uppercase tracking-[0.2em] text-white/50">Email</span>
+        <span className="text-[10px] uppercase tracking-[0.2em] text-foreground/50">Email</span>
         <input value={userEmail} disabled className="auth-input opacity-60" />
       </label>
       <label className="block">
-        <span className="text-[10px] uppercase tracking-[0.2em] text-white/50">Phone</span>
+        <span className="text-[10px] uppercase tracking-[0.2em] text-foreground/50">Phone</span>
         <input value={phone} onChange={(e) => setPhone(e.target.value)} className="auth-input" />
       </label>
       <button onClick={save} disabled={busy} className="btn-gold">Save Changes</button>
