@@ -1,2 +1,25 @@
 User-agent: *
 Allow: /
+Disallow: /account
+Disallow: /admin
+Disallow: /checkout
+Disallow: /cart
+Disallow: /auth
+Disallow: /api/
+
+User-agent: Googlebot
+Allow: /
+Disallow: /account
+Disallow: /admin
+Disallow: /checkout
+Disallow: /cart
+Disallow: /auth
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /

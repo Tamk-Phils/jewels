@@ -11,14 +11,98 @@ import { useAuth } from "@/lib/auth";
 import { ProductCard, type ProductCardProduct } from "@/components/product-card";
 
 export const Route = createFileRoute("/product/$slug")({
-  head: ({ params }) => ({
-    meta: [
-      { title: `Product — Marchello` },
+  loader: async ({ params }) => {
+    const { data } = await supabase
+      .from("products")
+      .select("name,slug,description,price,sale_price,images,stock,sku,material,category:categories(slug,name)")
+      .eq("slug", params.slug)
+      .eq("is_published", true)
+      .maybeSingle();
+    return { product: data };
+  },
+  head: ({ params, loaderData }) => {
+    const p = loaderData?.product;
+    const title = p ? `${p.name} | Marchello` : "Product | Marchello";
+    const desc = p?.description
+      ? p.description.slice(0, 155)
+      : "Hand-crafted luxury jewelry in 18k gold and diamonds.";
+    const price = p ? Number(p.sale_price ?? p.price) : null;
+    const img = p && Array.isArray(p.images) && p.images[0] ? (p.images[0] as string) : undefined;
+    const inStock = p ? (p.stock ?? 0) > 0 : false;
+
+    const meta: Array<Record<string, string>> = [
+      { title },
+      { name: "description", content: desc },
+      { property: "og:title", content: title },
+      { property: "og:description", content: desc },
       { property: "og:url", content: `/product/${params.slug}` },
       { property: "og:type", content: "product" },
-    ],
-    links: [{ rel: "canonical", href: `/product/${params.slug}` }],
-  }),
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: title },
+      { name: "twitter:description", content: desc },
+    ];
+    if (img) {
+      meta.push({ property: "og:image", content: img });
+      meta.push({ name: "twitter:image", content: img });
+    }
+    if (price != null) {
+      meta.push({ property: "product:price:amount", content: String(price) });
+      meta.push({ property: "product:price:currency", content: "USD" });
+      meta.push({ property: "product:availability", content: inStock ? "in stock" : "out of stock" });
+    }
+
+    const scripts = p
+      ? [
+          {
+            type: "application/ld+json",
+            children: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Product",
+              name: p.name,
+              description: p.description ?? desc,
+              image: img ? [img] : undefined,
+              sku: p.sku ?? p.slug,
+              brand: { "@type": "Brand", name: "Marchello" },
+              material: p.material ?? undefined,
+              category: p.category?.name,
+              offers: {
+                "@type": "Offer",
+                url: `/product/${params.slug}`,
+                priceCurrency: "USD",
+                price: price ?? undefined,
+                availability: inStock
+                  ? "https://schema.org/InStock"
+                  : "https://schema.org/OutOfStock",
+                itemCondition: "https://schema.org/NewCondition",
+              },
+            }),
+          },
+          {
+            type: "application/ld+json",
+            children: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "BreadcrumbList",
+              itemListElement: [
+                { "@type": "ListItem", position: 1, name: "Home", item: "/" },
+                p.category && {
+                  "@type": "ListItem",
+                  position: 2,
+                  name: p.category.name,
+                  item: `/category/${p.category.slug}`,
+                },
+                { "@type": "ListItem", position: 3, name: p.name, item: `/product/${params.slug}` },
+              ].filter(Boolean),
+            }),
+          },
+        ]
+      : [];
+
+    return {
+      meta,
+      links: [{ rel: "canonical", href: `/product/${params.slug}` }],
+      scripts,
+    };
+  },
   component: ProductPage,
 });
 

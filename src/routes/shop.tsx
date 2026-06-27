@@ -6,15 +6,25 @@ import { ProductCard, type ProductCardProduct } from "@/components/product-card"
 import { SlidersHorizontal } from "lucide-react";
 
 export const Route = createFileRoute("/shop")({
-  head: () => ({
-    meta: [
-      { title: "Shop All — Marchello" },
-      { name: "description", content: "Browse the full Marchello collection of fine jewelry." },
-      { property: "og:title", content: "Shop All — Marchello" },
-      { property: "og:url", content: "/shop" },
-    ],
-    links: [{ rel: "canonical", href: "/shop" }],
-  }),
+  head: () => {
+    const title = "Shop Luxury Fine Jewelry — 18k Gold & Diamonds | Marchello";
+    const desc =
+      "Browse the full Marchello collection: chains, pendants, watches, rings, bracelets and earrings in solid 18k gold and ethically sourced diamonds.";
+    return {
+      meta: [
+        { title },
+        { name: "description", content: desc },
+        { property: "og:title", content: title },
+        { property: "og:description", content: desc },
+        { property: "og:url", content: "/shop" },
+        { property: "og:type", content: "website" },
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:title", content: title },
+        { name: "twitter:description", content: desc },
+      ],
+      links: [{ rel: "canonical", href: "/shop" }],
+    };
+  },
   component: ShopPage,
 });
 
