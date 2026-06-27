@@ -62,7 +62,7 @@ export function SiteHeader() {
       </div>
 
       {open && (
-        <div className="fixed inset-0 z-50 bg-black md:hidden animate-fade-up">
+        <div className="fixed inset-0 z-50 bg-background md:hidden animate-fade-up">
           <div className="container-luxe flex items-center justify-between h-16">
             <Link to="/" onClick={() => setOpen(false)} className="font-display text-2xl">
               MARCHELLO<span className="text-gold">.</span>
