@@ -102,7 +102,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <CartProvider>
-          <div className="min-h-screen flex flex-col bg-black text-foreground">
+          <div className="min-h-screen flex flex-col bg-background text-foreground">
             <SiteHeader />
             <main className="flex-1"><Outlet /></main>
             <SiteFooter />
