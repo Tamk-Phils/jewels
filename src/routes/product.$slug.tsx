@@ -2,13 +2,14 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Heart, Share2, Truck, ShieldCheck, ChevronDown } from "lucide-react";
+import { Heart, Share2, Truck, ShieldCheck, ChevronDown, Play } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { formatPrice } from "@/lib/format";
 import { productPrimaryImage, resolveImage } from "@/lib/product-image";
 import { useCart } from "@/lib/cart";
 import { useAuth } from "@/lib/auth";
 import { ProductCard, type ProductCardProduct } from "@/components/product-card";
+import type { MediaItem } from "@/lib/media";
 
 export const Route = createFileRoute("/product/$slug")({
   loader: async ({ params }) => {
