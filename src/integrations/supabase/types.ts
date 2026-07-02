@@ -288,6 +288,7 @@ export type Database = {
           is_new: boolean
           is_published: boolean
           material: string | null
+          media: Json
           name: string
           price: number
           sale_price: number | null
@@ -313,6 +314,7 @@ export type Database = {
           is_new?: boolean
           is_published?: boolean
           material?: string | null
+          media?: Json
           name: string
           price: number
           sale_price?: number | null
@@ -338,6 +340,7 @@ export type Database = {
           is_new?: boolean
           is_published?: boolean
           material?: string | null
+          media?: Json
           name?: string
           price?: number
           sale_price?: number | null

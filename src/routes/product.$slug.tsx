@@ -2,13 +2,14 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Heart, Share2, Truck, ShieldCheck, ChevronDown } from "lucide-react";
+import { Heart, Share2, Truck, ShieldCheck, ChevronDown, Play } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { formatPrice } from "@/lib/format";
 import { productPrimaryImage, resolveImage } from "@/lib/product-image";
 import { useCart } from "@/lib/cart";
 import { useAuth } from "@/lib/auth";
 import { ProductCard, type ProductCardProduct } from "@/components/product-card";
+import type { MediaItem } from "@/lib/media";
 
 export const Route = createFileRoute("/product/$slug")({
   loader: async ({ params }) => {
@@ -179,18 +180,8 @@ function ProductPage() {
         </nav>
 
         <div className="grid md:grid-cols-2 gap-10 lg:gap-16">
-          <div className="space-y-4">
-            <div className="aspect-square bg-[var(--ink)] overflow-hidden">
-              <img src={img} alt={product.name} className="h-full w-full object-cover" />
-            </div>
-            <div className="grid grid-cols-4 gap-2">
-              {(Array.isArray(product.images) ? (product.images as string[]) : []).slice(0, 4).map((src, i) => (
-                <div key={i} className="aspect-square bg-[var(--ink)] overflow-hidden">
-                  <img src={resolveImage(src)} alt="" className="h-full w-full object-cover" />
-                </div>
-              ))}
-            </div>
-          </div>
+          <MediaGallery product={product} fallback={img} />
+
 
           <div>
             {product.category && (
@@ -281,9 +272,61 @@ function ProductPage() {
 
 function Row({ k, v }: { k: string; v: string }) {
   return (
-    <div className="flex justify-between border-b border-white/5 py-2">
+    <div className="flex justify-between border-b border-foreground/10 py-2">
       <dt className="text-foreground/40 uppercase tracking-widest text-xs">{k}</dt>
       <dd>{v}</dd>
     </div>
   );
 }
+
+function MediaGallery({
+  product,
+  fallback,
+}: {
+  product: { name: string; images?: unknown; media?: unknown };
+  fallback: string;
+}) {
+  const media: MediaItem[] = Array.isArray(product.media) && product.media.length > 0
+    ? (product.media as MediaItem[])
+    : (Array.isArray(product.images) ? (product.images as string[]) : [])
+        .map((src) => ({ url: resolveImage(src), path: src, type: "image" as const }));
+
+  const items: MediaItem[] = media.length > 0
+    ? media
+    : [{ url: fallback, path: "fallback", type: "image" }];
+  const [active, setActive] = useState(0);
+  const cur = items[active];
+
+  return (
+    <div className="space-y-4">
+      <div className="aspect-square bg-[var(--ink)] overflow-hidden">
+        {cur.type === "video" ? (
+          <video src={cur.url} controls playsInline poster={cur.poster ?? undefined} className="h-full w-full object-cover" />
+        ) : (
+          <img src={cur.url} alt={product.name} className="h-full w-full object-cover" />
+        )}
+      </div>
+      {items.length > 1 && (
+        <div className="grid grid-cols-5 gap-2">
+          {items.slice(0, 10).map((m, i) => (
+            <button
+              key={i}
+              onClick={() => setActive(i)}
+              className={`relative aspect-square bg-[var(--ink)] overflow-hidden border ${i === active ? "border-[var(--gold)]" : "border-transparent"}`}
+            >
+              {m.type === "video" ? (
+                <>
+                  <video src={m.url} className="h-full w-full object-cover" muted />
+                  <Play className="absolute inset-0 m-auto h-5 w-5 text-white drop-shadow" />
+                </>
+              ) : (
+                <img src={m.url} alt="" className="h-full w-full object-cover" />
+              )}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
