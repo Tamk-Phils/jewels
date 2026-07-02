@@ -179,18 +179,8 @@ function ProductPage() {
         </nav>
 
         <div className="grid md:grid-cols-2 gap-10 lg:gap-16">
-          <div className="space-y-4">
-            <div className="aspect-square bg-[var(--ink)] overflow-hidden">
-              <img src={img} alt={product.name} className="h-full w-full object-cover" />
-            </div>
-            <div className="grid grid-cols-4 gap-2">
-              {(Array.isArray(product.images) ? (product.images as string[]) : []).slice(0, 4).map((src, i) => (
-                <div key={i} className="aspect-square bg-[var(--ink)] overflow-hidden">
-                  <img src={resolveImage(src)} alt="" className="h-full w-full object-cover" />
-                </div>
-              ))}
-            </div>
-          </div>
+          <MediaGallery product={product} fallback={img} />
+
 
           <div>
             {product.category && (

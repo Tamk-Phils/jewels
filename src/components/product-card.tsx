@@ -10,6 +10,7 @@ export type ProductCardProduct = {
   sale_price: number | string | null;
   is_new?: boolean | null;
   images?: unknown;
+  media?: unknown;
   category?: { slug?: string; name?: string } | null;
 };
 
