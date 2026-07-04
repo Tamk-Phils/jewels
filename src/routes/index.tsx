@@ -1,11 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { motion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 import { supabase } from "@/integrations/supabase/client";
 import { ProductCard, type ProductCardProduct } from "@/components/product-card";
 import { categoryImage } from "@/lib/product-image";
 import heroImg from "@/assets/hero-chain.jpg";
-import { ArrowRight, Award, Diamond, Truck, ShieldCheck, Calendar, CreditCard, Users } from "lucide-react";
+import hero2 from "@/assets/hero-2.jpg";
+import hero3 from "@/assets/hero-3.jpg";
+import hero4 from "@/assets/hero-4.jpg";
+import { ArrowRight, Award, Diamond, Truck, ShieldCheck, Calendar, CreditCard, Users, ChevronLeft, ChevronRight } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
