@@ -170,6 +170,11 @@ function AdminPage() {
       </section>
 
       <section className="mb-12">
+        <h2 className="font-display text-2xl mb-4">Categories</h2>
+        <CategoriesManager />
+      </section>
+
+      <section className="mb-12">
         <h2 className="font-display text-2xl mb-4">Recent Orders</h2>
         <div className="bg-white/60 border border-foreground/10 overflow-x-auto">
           <table className="w-full text-sm">
@@ -181,10 +186,15 @@ function AdminPage() {
                 <tr key={o.id} className="border-t border-foreground/10">
                   <td className="p-4 font-mono text-gold">{o.order_number}</td>
                   <td className="p-4">{formatPrice(o.total_amount)}</td>
-                  <td className="p-4 capitalize">{o.status}</td>
+                  <td className="p-4">
+                    <OrderStatus id={o.id} status={o.status} />
+                  </td>
                   <td className="p-4 text-foreground/60">{new Date(o.created_at).toLocaleDateString()}</td>
                 </tr>
               ))}
+              {orders.length === 0 && (
+                <tr><td colSpan={4} className="p-6 text-center text-foreground/50">No orders yet.</td></tr>
+              )}
             </tbody>
           </table>
         </div>
