@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { Menu, Search, ShoppingBag, User, X, ChevronDown } from "lucide-react";
 import { useCart } from "@/lib/cart";
 import logoCrest from "@/assets/logo-crest.png";
