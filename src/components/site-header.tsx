@@ -127,8 +127,11 @@ function MobileMenu({ onClose }: { onClose: () => void }) {
     };
   }, []);
 
-  return (
+  if (typeof document === "undefined") return null;
+
+  return createPortal(
     <div className="fixed inset-0 z-[100] bg-background overflow-y-auto animate-fade-up">
+
       <div className="container-luxe flex items-center justify-between py-4 border-b border-foreground/10">
         <img src={logoCrest} alt="Marchello" className="h-14 w-auto" />
         <button onClick={onClose} className="p-2" aria-label="Close">
