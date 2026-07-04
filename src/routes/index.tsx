@@ -56,28 +56,32 @@ function HomePage() {
 
   return (
     <>
-      {/* HERO — split, editorial */}
-      <section className="grid md:grid-cols-2 min-h-[80vh]">
-        <div className="relative order-2 md:order-1 min-h-[50vh]">
+      {/* HERO CAROUSEL — full-width auto-scrolling background */}
+      <HeroCarousel />
+
+      {/* EDITORIAL SPLIT */}
+      <section className="grid md:grid-cols-2 min-h-[60vh]">
+        <div className="relative order-2 md:order-1 min-h-[40vh]">
           <img
             src={heroImg}
             alt="Diamond gold chains — Marchello The Jeweler"
             className="absolute inset-0 h-full w-full object-cover"
-            fetchPriority="high"
+            loading="lazy"
           />
         </div>
         <div className="order-1 md:order-2 flex items-center bg-[oklch(0.97_0.01_85)]">
           <motion.div
             initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
             transition={{ duration: 0.9 }}
             className="px-8 md:px-16 py-20 max-w-xl mx-auto"
           >
             <div className="text-sm text-foreground/60 mb-4">35 Years, Natural Earth Mined Diamond</div>
-            <h1 className="font-display text-4xl md:text-6xl leading-[1.05]">
+            <h2 className="font-display text-4xl md:text-6xl leading-[1.05]">
               Trusted by Generations,<br />
               <span className="text-gold">Loved</span> by Thousands
-            </h1>
+            </h2>
             <p className="mt-6 text-foreground/70">
               Family jewelers for over three decades — solid gold, natural diamonds,
               and pieces designed to be handed down.
