@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Menu, Search, ShoppingBag, User, X, ChevronDown } from "lucide-react";
 import { useCart } from "@/lib/cart";
 import logoCrest from "@/assets/logo-crest.png";
@@ -112,40 +112,49 @@ export function SiteHeader() {
         </div>
       </div>
 
-      {open && (
-        <div className="fixed inset-0 z-50 bg-background md:hidden animate-fade-up overflow-y-auto">
-          <div className="container-luxe flex items-center justify-between py-4">
-            <img src={logoCrest} alt="Marchello" className="h-14 w-auto" />
-            <button onClick={() => setOpen(false)} className="p-2" aria-label="Close">
-              <X className="h-5 w-5" />
-            </button>
-          </div>
-          <nav className="container-luxe flex flex-col gap-1 pb-10">
-            <Link to="/" onClick={() => setOpen(false)} className="font-display text-2xl py-3 border-b border-foreground/10">Home</Link>
-            {NAV.map((n) => (
-              <div key={n.label}>
-                <Link to={n.to} onClick={() => setOpen(false)} className="font-display text-2xl py-3 border-b border-foreground/10 block">
-                  {n.label}
-                </Link>
-                {n.children && (
-                  <div className="pl-4 py-2 flex flex-col gap-2 border-b border-foreground/10">
-                    {n.children.map((c) => (
-                      <Link
-                        key={c.label}
-                        to={c.to}
-                        onClick={() => setOpen(false)}
-                        className="text-sm text-foreground/70 hover:text-gold"
-                      >
-                        {c.label}
-                      </Link>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
-          </nav>
-        </div>
-      )}
+      {open && <MobileMenu onClose={() => setOpen(false)} />}
     </header>
+  );
+}
+
+function MobileMenu({ onClose }: { onClose: () => void }) {
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, []);
+
+  return (
+    <div className="fixed inset-0 z-[100] bg-background overflow-y-auto animate-fade-up">
+      <div className="container-luxe flex items-center justify-between py-4 border-b border-foreground/10">
+        <img src={logoCrest} alt="Marchello" className="h-14 w-auto" />
+        <button onClick={onClose} className="p-2" aria-label="Close">
+          <X className="h-5 w-5" />
+        </button>
+      </div>
+      <nav className="container-luxe flex flex-col gap-1 pb-10 pt-2">
+        <Link to="/" onClick={onClose} className="font-display text-2xl py-3 border-b border-foreground/10">Home</Link>
+        {NAV.map((n) => (
+          <div key={n.label}>
+            <Link to={n.to} onClick={onClose} className="font-display text-2xl py-3 border-b border-foreground/10 block">
+              {n.label}
+            </Link>
+            {n.children && (
+              <div className="pl-4 py-2 flex flex-col gap-2 border-b border-foreground/10">
+                {n.children.map((c) => (
+                  <Link key={c.label} to={c.to} onClick={onClose} className="text-sm text-foreground/70 hover:text-gold">
+                    {c.label}
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+        ))}
+        <Link to="/account" onClick={onClose} className="font-display text-2xl py-3 border-b border-foreground/10">Account</Link>
+        <Link to="/cart" onClick={onClose} className="font-display text-2xl py-3 border-b border-foreground/10">Cart</Link>
+      </nav>
+    </div>
   );
 }

@@ -170,6 +170,11 @@ function AdminPage() {
       </section>
 
       <section className="mb-12">
+        <h2 className="font-display text-2xl mb-4">Categories</h2>
+        <CategoriesManager />
+      </section>
+
+      <section className="mb-12">
         <h2 className="font-display text-2xl mb-4">Recent Orders</h2>
         <div className="bg-white/60 border border-foreground/10 overflow-x-auto">
           <table className="w-full text-sm">
@@ -181,10 +186,15 @@ function AdminPage() {
                 <tr key={o.id} className="border-t border-foreground/10">
                   <td className="p-4 font-mono text-gold">{o.order_number}</td>
                   <td className="p-4">{formatPrice(o.total_amount)}</td>
-                  <td className="p-4 capitalize">{o.status}</td>
+                  <td className="p-4">
+                    <OrderStatus id={o.id} status={o.status} />
+                  </td>
                   <td className="p-4 text-foreground/60">{new Date(o.created_at).toLocaleDateString()}</td>
                 </tr>
               ))}
+              {orders.length === 0 && (
+                <tr><td colSpan={4} className="p-6 text-center text-foreground/50">No orders yet.</td></tr>
+              )}
             </tbody>
           </table>
         </div>
@@ -353,5 +363,99 @@ function Toggle({ label, v, onChange }: { label: string; v: boolean; onChange: (
       <input type="checkbox" checked={v} onChange={(e) => onChange(e.target.checked)} className="accent-[var(--gold)]" />
       {label}
     </label>
+  );
+}
+
+const ORDER_STATUSES = ["pending", "paid", "processing", "shipped", "delivered", "cancelled", "refunded"] as const;
+
+function OrderStatus({ id, status }: { id: string; status: string }) {
+  const qc = useQueryClient();
+  const [val, setVal] = useState(status);
+  const [saving, setSaving] = useState(false);
+  const change = async (v: string) => {
+    setVal(v);
+    setSaving(true);
+    const { error } = await supabase.from("orders").update({ status: v }).eq("id", id);
+    setSaving(false);
+    if (error) {
+      toast.error(error.message);
+      setVal(status);
+    } else {
+      toast.success("Status updated");
+      qc.invalidateQueries({ queryKey: ["admin-orders"] });
+    }
+  };
+  return (
+    <select
+      value={val}
+      disabled={saving}
+      onChange={(e) => change(e.target.value)}
+      className="bg-transparent border border-foreground/15 rounded px-2 py-1 text-xs capitalize focus:border-[var(--gold)] focus:outline-none"
+    >
+      {ORDER_STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
+    </select>
+  );
+}
+
+function CategoriesManager() {
+  const qc = useQueryClient();
+  const [name, setName] = useState("");
+  const [slug, setSlug] = useState("");
+  const { data: cats = [] } = useQuery({
+    queryKey: ["admin-categories-full"],
+    queryFn: async () => {
+      const { data } = await supabase.from("categories").select("id,name,slug,sort_order").order("sort_order");
+      return data ?? [];
+    },
+  });
+  const add = async () => {
+    if (!name || !slug) return toast.error("Name and slug required");
+    const { error } = await supabase.from("categories").insert({ name, slug, sort_order: cats.length });
+    if (error) return toast.error(error.message);
+    setName(""); setSlug("");
+    toast.success("Category added");
+    qc.invalidateQueries({ queryKey: ["admin-categories-full"] });
+    qc.invalidateQueries({ queryKey: ["admin-categories"] });
+  };
+  const remove = async (id: string) => {
+    if (!confirm("Delete this category?")) return;
+    const { error } = await supabase.from("categories").delete().eq("id", id);
+    if (error) return toast.error(error.message);
+    qc.invalidateQueries({ queryKey: ["admin-categories-full"] });
+    qc.invalidateQueries({ queryKey: ["admin-categories"] });
+  };
+  return (
+    <div className="bg-white/60 border border-foreground/10 p-5">
+      <div className="grid sm:grid-cols-[1fr_1fr_auto] gap-3 mb-4">
+        <input
+          className="bg-transparent border border-foreground/15 rounded px-3 py-2 text-sm focus:border-[var(--gold)] focus:outline-none"
+          placeholder="Category name"
+          value={name}
+          onChange={(e) => {
+            setName(e.target.value);
+            if (!slug) setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]+/g, "-"));
+          }}
+        />
+        <input
+          className="bg-transparent border border-foreground/15 rounded px-3 py-2 text-sm focus:border-[var(--gold)] focus:outline-none"
+          placeholder="slug"
+          value={slug}
+          onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]+/g, "-"))}
+        />
+        <button onClick={add} className="btn-gold"><Plus className="h-4 w-4" /> Add</button>
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {cats.map((c) => (
+          <div key={c.id} className="flex items-center gap-2 border border-foreground/15 rounded px-3 py-1.5 text-sm">
+            <span className="font-medium">{c.name}</span>
+            <span className="text-foreground/50 text-xs">/{c.slug}</span>
+            <button onClick={() => remove(c.id)} className="text-foreground/40 hover:text-red-600" aria-label="Delete">
+              <Trash2 className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        ))}
+        {cats.length === 0 && <div className="text-sm text-foreground/50">No categories yet.</div>}
+      </div>
+    </div>
   );
 }

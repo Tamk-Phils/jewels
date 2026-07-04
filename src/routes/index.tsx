@@ -1,11 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { motion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 import { supabase } from "@/integrations/supabase/client";
 import { ProductCard, type ProductCardProduct } from "@/components/product-card";
 import { categoryImage } from "@/lib/product-image";
 import heroImg from "@/assets/hero-chain.jpg";
-import { ArrowRight, Award, Diamond, Truck, ShieldCheck, Calendar, CreditCard, Users } from "lucide-react";
+import hero2 from "@/assets/hero-2.jpg";
+import hero3 from "@/assets/hero-3.jpg";
+import hero4 from "@/assets/hero-4.jpg";
+import { ArrowRight, Award, Diamond, Truck, ShieldCheck, Calendar, CreditCard, Users, ChevronLeft, ChevronRight } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -52,28 +56,32 @@ function HomePage() {
 
   return (
     <>
-      {/* HERO — split, editorial */}
-      <section className="grid md:grid-cols-2 min-h-[80vh]">
-        <div className="relative order-2 md:order-1 min-h-[50vh]">
+      {/* HERO CAROUSEL — full-width auto-scrolling background */}
+      <HeroCarousel />
+
+      {/* EDITORIAL SPLIT */}
+      <section className="grid md:grid-cols-2 min-h-[60vh]">
+        <div className="relative order-2 md:order-1 min-h-[40vh]">
           <img
             src={heroImg}
             alt="Diamond gold chains — Marchello The Jeweler"
             className="absolute inset-0 h-full w-full object-cover"
-            fetchPriority="high"
+            loading="lazy"
           />
         </div>
         <div className="order-1 md:order-2 flex items-center bg-[oklch(0.97_0.01_85)]">
           <motion.div
             initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
             transition={{ duration: 0.9 }}
             className="px-8 md:px-16 py-20 max-w-xl mx-auto"
           >
             <div className="text-sm text-foreground/60 mb-4">35 Years, Natural Earth Mined Diamond</div>
-            <h1 className="font-display text-4xl md:text-6xl leading-[1.05]">
+            <h2 className="font-display text-4xl md:text-6xl leading-[1.05]">
               Trusted by Generations,<br />
               <span className="text-gold">Loved</span> by Thousands
-            </h1>
+            </h2>
             <p className="mt-6 text-foreground/70">
               Family jewelers for over three decades — solid gold, natural diamonds,
               and pieces designed to be handed down.
@@ -243,5 +251,115 @@ function HomePage() {
         </form>
       </section>
     </>
+  );
+}
+
+const HERO_SLIDES = [
+  {
+    img: hero2,
+    kicker: "The Signature Collection",
+    title: "Solid Gold. Natural Diamonds.",
+    sub: "Handcrafted heirlooms designed to last generations.",
+    cta: { to: "/shop", label: "Shop the Collection" },
+  },
+  {
+    img: hero3,
+    kicker: "Timepieces",
+    title: "Watches Worth the Wait.",
+    sub: "Iced-out classics and pre-owned luxury watches.",
+    cta: { to: "/category/watches", label: "Explore Watches" },
+  },
+  {
+    img: hero4,
+    kicker: "Diamond Rings & Bracelets",
+    title: "Every Facet, Perfected.",
+    sub: "Certified natural earth-mined diamonds, set in 14k & 18k gold.",
+    cta: { to: "/category/rings", label: "Shop Rings" },
+  },
+] as const;
+
+function HeroCarousel() {
+  const [i, setI] = useState(0);
+  const n = HERO_SLIDES.length;
+  const go = (d: number) => setI((v) => (v + d + n) % n);
+
+  useEffect(() => {
+    const id = setInterval(() => setI((v) => (v + 1) % n), 6000);
+    return () => clearInterval(id);
+  }, [n]);
+
+  const slide = HERO_SLIDES[i];
+
+  return (
+    <section className="relative h-[70vh] min-h-[480px] md:h-[85vh] overflow-hidden bg-black">
+      <AnimatePresence mode="sync">
+        <motion.div
+          key={i}
+          initial={{ opacity: 0, scale: 1.06 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 1.2, ease: "easeOut" }}
+          className="absolute inset-0"
+        >
+          <img
+            src={slide.img}
+            alt={slide.title}
+            className="h-full w-full object-cover"
+            fetchPriority={i === 0 ? "high" : "auto"}
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-black/10" />
+        </motion.div>
+      </AnimatePresence>
+
+      <div className="relative z-10 h-full container-luxe flex items-center">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -12 }}
+            transition={{ duration: 0.7, delay: 0.15 }}
+            className="max-w-xl text-white"
+          >
+            <div className="text-[10px] md:text-xs tracking-[0.35em] uppercase text-[var(--gold)] mb-4">
+              {slide.kicker}
+            </div>
+            <h1 className="font-display text-4xl md:text-6xl leading-[1.05]">{slide.title}</h1>
+            <p className="mt-5 text-white/80 max-w-md">{slide.sub}</p>
+            <Link to={slide.cta.to} className="btn-gold mt-8 inline-flex">
+              {slide.cta.label} <ArrowRight className="h-3 w-3" />
+            </Link>
+          </motion.div>
+        </AnimatePresence>
+      </div>
+
+      {/* Manual controls */}
+      <button
+        onClick={() => go(-1)}
+        aria-label="Previous slide"
+        className="absolute left-3 md:left-6 top-1/2 -translate-y-1/2 z-20 h-11 w-11 flex items-center justify-center bg-black/40 hover:bg-black/70 text-white backdrop-blur-sm border border-white/20"
+      >
+        <ChevronLeft className="h-5 w-5" />
+      </button>
+      <button
+        onClick={() => go(1)}
+        aria-label="Next slide"
+        className="absolute right-3 md:right-6 top-1/2 -translate-y-1/2 z-20 h-11 w-11 flex items-center justify-center bg-black/40 hover:bg-black/70 text-white backdrop-blur-sm border border-white/20"
+      >
+        <ChevronRight className="h-5 w-5" />
+      </button>
+
+      {/* Dots */}
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex gap-2">
+        {HERO_SLIDES.map((_, idx) => (
+          <button
+            key={idx}
+            onClick={() => setI(idx)}
+            aria-label={`Go to slide ${idx + 1}`}
+            className={`h-1.5 transition-all ${idx === i ? "w-8 bg-[var(--gold)]" : "w-4 bg-white/50 hover:bg-white/80"}`}
+          />
+        ))}
+      </div>
+    </section>
   );
 }
