@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Menu, Search, ShoppingBag, User, X, ChevronDown } from "lucide-react";
 import { useCart } from "@/lib/cart";
 import logoCrest from "@/assets/logo-crest.png";
