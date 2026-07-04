@@ -159,6 +159,8 @@ function MobileMenu({ onClose }: { onClose: () => void }) {
         <Link to="/account" onClick={onClose} className="font-display text-2xl py-3 border-b border-foreground/10">Account</Link>
         <Link to="/cart" onClick={onClose} className="font-display text-2xl py-3 border-b border-foreground/10">Cart</Link>
       </nav>
-    </div>
+    </div>,
+    document.body,
   );
+
 }
