@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { Menu, Search, ShoppingBag, User, X, ChevronDown } from "lucide-react";
 import { useCart } from "@/lib/cart";
 import logoCrest from "@/assets/logo-crest.png";
@@ -126,8 +127,11 @@ function MobileMenu({ onClose }: { onClose: () => void }) {
     };
   }, []);
 
-  return (
-    <div className="fixed inset-0 z-[100] bg-background overflow-y-auto animate-fade-up">
+  if (typeof document === "undefined") return null;
+
+  return createPortal(
+    <div className="fixed inset-0 z-[100] bg-[var(--background)] overflow-y-auto animate-fade-up" style={{ backgroundColor: "var(--background)" }}>
+
       <div className="container-luxe flex items-center justify-between py-4 border-b border-foreground/10">
         <img src={logoCrest} alt="Marchello" className="h-14 w-auto" />
         <button onClick={onClose} className="p-2" aria-label="Close">
@@ -155,6 +159,8 @@ function MobileMenu({ onClose }: { onClose: () => void }) {
         <Link to="/account" onClick={onClose} className="font-display text-2xl py-3 border-b border-foreground/10">Account</Link>
         <Link to="/cart" onClick={onClose} className="font-display text-2xl py-3 border-b border-foreground/10">Cart</Link>
       </nav>
-    </div>
+    </div>,
+    document.body,
   );
+
 }
