@@ -3,7 +3,6 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
 
 const searchSchema = z.object({ redirect: z.string().optional() });
 
@@ -59,13 +58,8 @@ function AuthPage() {
 
   const google = async () => {
     setBusy(true);
-    const res = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: typeof window !== "undefined" ? window.location.origin : undefined,
-    });
+    toast.message("Google sign-in is unavailable in this local setup.");
     setBusy(false);
-    if (res.error) { toast.error("Google sign-in failed"); return; }
-    if (res.redirected) return;
-    go();
   };
 
   return (

@@ -1,0 +1,88 @@
+:root {
+  color-scheme: light;
+  --background: #f7f1e3;
+  --foreground: #1f1a12;
+  --gold: #c8a24a;
+  --ink: #f2eadc;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+body {
+  min-height: 100vh;
+}
+
+* { box-sizing: border-box; }
+a { color: inherit; text-decoration: none; }
+img { max-width: 100%; display: block; }
+
+.container-luxe {
+  width: min(1400px, calc(100% - 2rem));
+  margin: 0 auto;
+}
+
+.btn-gold, .btn-ghost-gold {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.85rem 1.6rem;
+  font-weight: 600;
+  font-size: 0.8rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  border-radius: 0.25rem;
+  cursor: pointer;
+}
+
+.btn-gold {
+  background: var(--gold);
+  color: #000;
+  border: 1px solid var(--gold);
+}
+
+.btn-ghost-gold {
+  background: transparent;
+  color: var(--gold);
+  border: 1px solid var(--gold);
+}
+
+.text-gold { color: var(--gold); }
+.glass {
+  background: rgba(255,255,255,0.75);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(0,0,0,0.06);
+}
+
+.eyebrow {
+  font-size: 0.7rem;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--gold);
+  font-weight: 600;
+}
+
+.font-display {
+  font-family: "Playfair Display", Georgia, serif;
+}
+
+.min-h-screen { min-height: 100vh; }
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.items-center { align-items: center; }
+.justify-center { justify-content: center; }
+.justify-between { justify-content: space-between; }
+.px-4 { padding-left: 1rem; padding-right: 1rem; }
+.py-8 { padding-top: 2rem; padding-bottom: 2rem; }
+.text-center { text-align: center; }
+.text-foreground\/60 { color: rgba(31,26,18,0.6); }
+.text-foreground\/70 { color: rgba(31,26,18,0.7); }
+.text-foreground\/80 { color: rgba(31,26,18,0.8); }
+.bg-background { background: var(--background); }
+.text-foreground { color: var(--foreground); }
