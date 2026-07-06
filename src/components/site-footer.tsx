@@ -1,4 +1,3 @@
-import { Link } from "@tanstack/react-router";
 import { Instagram, Facebook, Twitter } from "lucide-react";
 
 export function SiteFooter() {
@@ -19,29 +18,29 @@ export function SiteFooter() {
         <div>
           <div className="eyebrow mb-4">Shop</div>
           <ul className="space-y-2 text-sm text-foreground/70">
-            <li><Link to="/category/chains" className="hover:text-gold">Chains</Link></li>
-            <li><Link to="/category/pendants" className="hover:text-gold">Pendants</Link></li>
-            <li><Link to="/category/watches" className="hover:text-gold">Watches</Link></li>
-            <li><Link to="/category/rings" className="hover:text-gold">Rings</Link></li>
-            <li><Link to="/category/bracelets" className="hover:text-gold">Bracelets</Link></li>
-            <li><Link to="/category/earrings" className="hover:text-gold">Earrings</Link></li>
+            <li><a href="/category/chains" className="hover:text-gold">Chains</a></li>
+            <li><a href="/category/pendants" className="hover:text-gold">Pendants</a></li>
+            <li><a href="/category/watches" className="hover:text-gold">Watches</a></li>
+            <li><a href="/category/rings" className="hover:text-gold">Rings</a></li>
+            <li><a href="/category/bracelets" className="hover:text-gold">Bracelets</a></li>
+            <li><a href="/category/earrings" className="hover:text-gold">Earrings</a></li>
           </ul>
         </div>
         <div>
           <div className="eyebrow mb-4">Help</div>
           <ul className="space-y-2 text-sm text-foreground/70">
-            <li><Link to="/contact" className="hover:text-gold">Contact</Link></li>
-            <li><Link to="/faq" className="hover:text-gold">FAQ</Link></li>
-            <li><Link to="/shipping" className="hover:text-gold">Shipping</Link></li>
-            <li><Link to="/returns" className="hover:text-gold">Returns</Link></li>
+            <li><a href="/contact" className="hover:text-gold">Contact</a></li>
+            <li><a href="/faq" className="hover:text-gold">FAQ</a></li>
+            <li><a href="/shipping" className="hover:text-gold">Shipping</a></li>
+            <li><a href="/returns" className="hover:text-gold">Returns</a></li>
           </ul>
         </div>
         <div>
           <div className="eyebrow mb-4">Company</div>
           <ul className="space-y-2 text-sm text-foreground/70">
-            <li><Link to="/about" className="hover:text-gold">About</Link></li>
-            <li><Link to="/privacy" className="hover:text-gold">Privacy Policy</Link></li>
-            <li><Link to="/terms" className="hover:text-gold">Terms</Link></li>
+            <li><a href="/about" className="hover:text-gold">About</a></li>
+            <li><a href="/privacy" className="hover:text-gold">Privacy Policy</a></li>
+            <li><a href="/terms" className="hover:text-gold">Terms</a></li>
           </ul>
         </div>
       </div>

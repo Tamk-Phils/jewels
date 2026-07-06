@@ -1,4 +1,3 @@
-import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Menu, Search, ShoppingBag, User, X, ChevronDown } from "lucide-react";
@@ -53,7 +52,7 @@ export function SiteHeader() {
         </button>
 
         {/* Crest logo */}
-        <Link to="/" className="flex items-center shrink-0" aria-label="Marchello The Jeweler">
+        <a href="/" className="flex items-center shrink-0" aria-label="Marchello The Jeweler">
           <img
             src={logoCrest}
             alt="Marchello The Jeweler"
@@ -61,11 +60,11 @@ export function SiteHeader() {
             height={140}
             className="h-16 md:h-20 w-auto object-contain"
           />
-        </Link>
+        </a>
 
         {/* Desktop nav with mega-menu hover */}
         <nav className="hidden md:flex items-center gap-7 text-[13px] font-medium">
-          <Link to="/" className="hover:text-gold">Home</Link>
+          <a href="/" className="hover:text-gold">Home</a>
           {NAV.map((n) =>
             n.children ? (
               <div key={n.label} className="relative group">
@@ -75,22 +74,21 @@ export function SiteHeader() {
                 <div className="invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-opacity absolute left-1/2 -translate-x-1/2 top-full pt-3 w-56">
                   <div className="bg-background border border-foreground/10 shadow-xl py-2">
                     {n.children.map((c) => (
-                      <Link
+                      <a
                         key={c.label}
-                        to={c.to as never}
-                        params={c.to.includes("$slug") ? undefined : undefined as never}
+                        href={c.to}
                         className="block px-5 py-2 text-sm hover:text-gold hover:bg-foreground/5"
                       >
                         {c.label}
-                      </Link>
+                      </a>
                     ))}
                   </div>
                 </div>
               </div>
             ) : (
-              <Link key={n.label} to={n.to} className="hover:text-gold">
+              <a key={n.label} href={n.to} className="hover:text-gold">
                 {n.label}
-              </Link>
+              </a>
             )
           )}
         </nav>
@@ -99,17 +97,17 @@ export function SiteHeader() {
           <button className="p-2 hover:text-gold hidden sm:block" aria-label="Search">
             <Search className="h-5 w-5" />
           </button>
-          <Link to="/account" className="p-2 hover:text-gold" aria-label="Account">
+          <a href="/account" className="p-2 hover:text-gold" aria-label="Account">
             <User className="h-5 w-5" />
-          </Link>
-          <Link to="/cart" className="relative p-2 hover:text-gold" aria-label="Cart">
+          </a>
+          <a href="/cart" className="relative p-2 hover:text-gold" aria-label="Cart">
             <ShoppingBag className="h-5 w-5" />
             {count > 0 && (
               <span className="absolute -top-0.5 -right-0.5 bg-[var(--gold)] text-black text-[10px] font-semibold rounded-full h-4 w-4 flex items-center justify-center">
                 {count}
               </span>
             )}
-          </Link>
+          </a>
         </div>
       </div>
 
@@ -139,25 +137,25 @@ function MobileMenu({ onClose }: { onClose: () => void }) {
         </button>
       </div>
       <nav className="container-luxe flex flex-col gap-1 pb-10 pt-2">
-        <Link to="/" onClick={onClose} className="font-display text-2xl py-3 border-b border-foreground/10">Home</Link>
+        <a href="/" onClick={onClose} className="font-display text-2xl py-3 border-b border-foreground/10">Home</a>
         {NAV.map((n) => (
           <div key={n.label}>
-            <Link to={n.to} onClick={onClose} className="font-display text-2xl py-3 border-b border-foreground/10 block">
+            <a href={n.to} onClick={onClose} className="font-display text-2xl py-3 border-b border-foreground/10 block">
               {n.label}
-            </Link>
+            </a>
             {n.children && (
               <div className="pl-4 py-2 flex flex-col gap-2 border-b border-foreground/10">
                 {n.children.map((c) => (
-                  <Link key={c.label} to={c.to} onClick={onClose} className="text-sm text-foreground/70 hover:text-gold">
+                  <a key={c.label} href={c.to} onClick={onClose} className="text-sm text-foreground/70 hover:text-gold">
                     {c.label}
-                  </Link>
+                  </a>
                 ))}
               </div>
             )}
           </div>
         ))}
-        <Link to="/account" onClick={onClose} className="font-display text-2xl py-3 border-b border-foreground/10">Account</Link>
-        <Link to="/cart" onClick={onClose} className="font-display text-2xl py-3 border-b border-foreground/10">Cart</Link>
+        <a href="/account" onClick={onClose} className="font-display text-2xl py-3 border-b border-foreground/10">Account</a>
+        <a href="/cart" onClick={onClose} className="font-display text-2xl py-3 border-b border-foreground/10">Cart</a>
       </nav>
     </div>,
     document.body,

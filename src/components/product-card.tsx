@@ -1,4 +1,3 @@
-import { Link } from "@tanstack/react-router";
 import { formatPrice } from "@/lib/format";
 import { productPrimaryImage } from "@/lib/product-image";
 
@@ -20,9 +19,8 @@ export function ProductCard({ p }: { p: ProductCardProduct }) {
   const img = productPrimaryImage(p);
 
   return (
-    <Link
-      to="/product/$slug"
-      params={{ slug: p.slug }}
+    <a
+      href={`/product/${p.slug}`}
       className="group block animate-fade-up"
     >
       <div className="relative aspect-[4/5] overflow-hidden bg-[var(--ink)]">
@@ -55,6 +53,6 @@ export function ProductCard({ p }: { p: ProductCardProduct }) {
           )}
         </div>
       </div>
-    </Link>
+    </a>
   );
 }
