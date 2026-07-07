@@ -54,7 +54,7 @@
   --popover: oklch(1 0 0);
   --popover-foreground: var(--foreground);
 
-  --gold: oklch(0.62 0.13 75);
+  --gold: #e8c547;
   --gold-soft: oklch(0.78 0.11 85);
 
   --primary: var(--gold);
@@ -113,19 +113,19 @@
 @utility btn-gold {
   display: inline-flex; align-items: center; justify-content: center;
   gap: 0.5rem;
-  padding: 0.85rem 1.6rem;
+  padding: 0.75rem 1.5rem;
   font-family: var(--font-sans);
-  font-weight: 500;
-  font-size: 0.8rem;
-  letter-spacing: 0.18em;
+  font-weight: 600;
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  background: var(--gold);
+  background: #ffd700;
   color: #000;
-  border-radius: var(--radius);
-  transition: all 0.3s ease;
-  border: 1px solid var(--gold);
+  border-radius: 2px;
+  transition: all 0.25s ease;
+  border: 1px solid #ffd700;
   cursor: pointer;
-  &:hover { background: transparent; color: var(--gold); }
+  &:hover { background: #e8c200; border-color: #e8c200; }
 }
 
 @utility btn-ghost-gold {

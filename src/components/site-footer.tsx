@@ -2,58 +2,70 @@ import { Instagram, Facebook, Twitter, Phone } from "lucide-react";
 
 export function SiteFooter() {
   return (
-    <footer className="mt-32 border-t border-white/10 bg-[var(--ink)]">
-      <div className="container-luxe py-20 grid gap-10 md:grid-cols-4">
+    <footer className="border-t border-white/10 bg-[#1a1a1a] text-white">
+      <div className="container-luxe py-16 grid gap-10 md:grid-cols-4">
         <div>
-          <div className="font-display text-2xl mb-4">MARCHELLO<span className="text-gold">.</span></div>
-          <p className="text-sm text-foreground/60 max-w-xs">
-            Natural earth-mined diamonds and solid gold jewelry. Trusted for 35+ years.
+          <div className="font-display text-2xl mb-4 text-white">MARCHELLO<span className="text-[#e8c547]">.</span></div>
+          <p className="text-sm text-white/60 max-w-xs leading-relaxed">
+            22 West 47th Street
+            <br />
+            New York, NY 10036
           </p>
-          <div className="flex gap-4 mt-6 text-foreground/60">
-            <a aria-label="Instagram" href="https://instagram.com/marchello" className="hover:text-gold"><Instagram className="h-4 w-4" /></a>
-            <a aria-label="Facebook" href="https://facebook.com/marchello" className="hover:text-gold"><Facebook className="h-4 w-4" /></a>
-            <a aria-label="Twitter" href="https://twitter.com/marchello" className="hover:text-gold"><Twitter className="h-4 w-4" /></a>
+          <p className="text-sm text-white/60 mt-3">
+            <a href="tel:+17185586139" className="hover:text-[#e8c547]">+1 (718) 558-6139</a>
+            <br />
+            <a href="mailto:info@marchellothejeweler.com" className="hover:text-[#e8c547]">info@marchellothejeweler.com</a>
+          </p>
+          <div className="flex gap-4 mt-6 text-white/50">
+            <a aria-label="Instagram" href="https://instagram.com/marchello" className="hover:text-[#e8c547]"><Instagram className="h-4 w-4" /></a>
+            <a aria-label="Facebook" href="https://facebook.com/marchello" className="hover:text-[#e8c547]"><Facebook className="h-4 w-4" /></a>
+            <a aria-label="Twitter" href="https://twitter.com/marchello" className="hover:text-[#e8c547]"><Twitter className="h-4 w-4" /></a>
           </div>
         </div>
         <div>
-          <div className="eyebrow mb-4">Shop</div>
-          <ul className="space-y-2 text-sm text-foreground/70">
-            <li><a href="/shop" className="hover:text-gold">All Items</a></li>
-            <li><a href="/shop" className="hover:text-gold">Specials</a></li>
-            <li><a href="/shop" className="hover:text-gold">Under $1500</a></li>
-            <li><a href="/contact" className="hover:text-gold">Sell Your Gold/Watches</a></li>
+          <div className="text-[10px] tracking-[0.3em] uppercase text-[#e8c547] mb-4">Links</div>
+          <ul className="space-y-2 text-sm text-white/70">
+            <li><a href="/" className="hover:text-[#e8c547]">Home</a></li>
+            <li><a href="/shop" className="hover:text-[#e8c547]">Store</a></li>
+            <li><a href="/shop" className="hover:text-[#e8c547]">Collections</a></li>
+            <li><a href="/contact" className="hover:text-[#e8c547]">Custom Orders</a></li>
           </ul>
         </div>
         <div>
-          <div className="eyebrow mb-4">Info</div>
-          <ul className="space-y-2 text-sm text-foreground/70">
-            <li><a href="/terms" className="hover:text-gold">Terms of Service</a></li>
-            <li><a href="/returns" className="hover:text-gold">Refund Policy</a></li>
-            <li><a href="/privacy" className="hover:text-gold">Privacy Policy</a></li>
-            <li><a href="/faq" className="hover:text-gold">FAQ</a></li>
+          <div className="text-[10px] tracking-[0.3em] uppercase text-[#e8c547] mb-4">Info</div>
+          <ul className="space-y-2 text-sm text-white/70">
+            <li><a href="/about" className="hover:text-[#e8c547]">About Us</a></li>
+            <li><a href="/contact" className="hover:text-[#e8c547]">Contact</a></li>
+            <li><a href="/faq" className="hover:text-[#e8c547]">FAQ</a></li>
           </ul>
         </div>
         <div>
-          <div className="eyebrow mb-4">Need help?</div>
-          <ul className="space-y-3 text-sm text-foreground/70">
+          <div className="text-[10px] tracking-[0.3em] uppercase text-[#e8c547] mb-4">Shop</div>
+          <ul className="space-y-2 text-sm text-white/70">
+            <li><a href="/shop" className="hover:text-[#e8c547]">All Items</a></li>
+            <li><a href="/shop" className="hover:text-[#e8c547]">Specials</a></li>
+            <li><a href="/shop" className="hover:text-[#e8c547]">Under $1500</a></li>
+          </ul>
+          <ul className="space-y-3 text-sm text-white/70 mt-6">
             <li className="flex gap-2 items-start">
-              <Phone className="h-4 w-4 text-gold mt-0.5 shrink-0" />
+              <Phone className="h-4 w-4 text-[#e8c547] mt-0.5 shrink-0" />
               <span>
-                Got questions? Call us<br />
-                <a href="tel:+17185586139" className="hover:text-gold">+1 (718) 558-6139</a>
+                Chat with Eden<br />
+                <a href="https://wa.me/19296891990" className="hover:text-[#e8c547]">+1 (929) 689-1990</a>
               </span>
-            </li>
-            <li>
-              Personal assistant — Chat with Eden<br />
-              <a href="https://wa.me/19296891990" className="hover:text-gold">+1 (929) 689-1990</a>
             </li>
           </ul>
         </div>
       </div>
       <div className="border-t border-white/10">
-        <div className="container-luxe py-6 flex flex-col md:flex-row justify-between text-xs text-foreground/40 gap-2">
+        <div className="container-luxe py-6 flex flex-col md:flex-row justify-between items-center text-xs text-white/40 gap-4">
           <span>© {new Date().getFullYear()} Marchello The Jeweler. All rights reserved.</span>
-          <span>Jamaica, New York</span>
+          <div className="flex gap-3 text-[10px] tracking-wider uppercase text-white/30">
+            <span>Visa</span>
+            <span>Mastercard</span>
+            <span>Amex</span>
+            <span>PayPal</span>
+          </div>
         </div>
       </div>
     </footer>
