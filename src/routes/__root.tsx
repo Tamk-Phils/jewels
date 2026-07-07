@@ -138,7 +138,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <CartProvider>
-          <div className="min-h-screen flex flex-col bg-background text-foreground">
+          <div className="min-h-screen flex flex-col bg-background text-foreground overflow-x-hidden">
             <SiteHeader />
             <main className="flex-1"><Outlet /></main>
             <SiteFooter />
