@@ -6,9 +6,16 @@ import { supabase } from "@/integrations/supabase/client";
 import { ProductCard, type ProductCardProduct } from "@/components/product-card";
 import { categoryImage } from "@/lib/product-image";
 import heroImg from "@/assets/hero-chain.jpg";
-import hero2 from "@/assets/hero-2.jpg";
+import heroBanner from "@/assets/hero-banner.png";
+import hero2 from "@/assets/hero-2.png";
 import hero3 from "@/assets/hero-3.jpg";
 import hero4 from "@/assets/hero-4.jpg";
+import specializeImg from "@/assets/about-specialize.jpg";
+import collectionMensRings from "@/assets/collection-mens-rings.jpg";
+import collectionWomensEarrings from "@/assets/collection-womens-earrings.jpg";
+import collectionUnisexEarrings from "@/assets/collection-unisex-earrings.jpg";
+import collectionChainCharm from "@/assets/collection-chain-charm.jpg";
+import collectionMemory from "@/assets/collection-memory.jpg";
 import { ArrowRight, Award, Diamond, Truck, ShieldCheck, Calendar, CreditCard, Users, ChevronLeft, ChevronRight } from "lucide-react";
 
 export const Route = createFileRoute("/")({
@@ -27,13 +34,23 @@ export const Route = createFileRoute("/")({
   component: HomePage,
 });
 
-const CATS = [
+const TOP_CATS = [
   { slug: "chains", label: "Chains" },
-  { slug: "pendants", label: "Pendants" },
-  { slug: "watches", label: "Watches" },
-  { slug: "rings", label: "Rings" },
+  { slug: "watches", label: "All Watches" },
   { slug: "bracelets", label: "Bracelets" },
-  { slug: "earrings", label: "Earrings" },
+];
+
+const DISCOVER_COLLECTIONS = [
+  { slug: "rings", label: "Engagement Rings", image: categoryImage.rings, to: "/category/rings" as const },
+  { slug: "rings", label: "Women's Rings", image: categoryImage.rings, to: "/category/rings" as const },
+  { slug: "rings", label: "Men's Rings", image: collectionMensRings, to: "/category/rings" as const },
+  { slug: "earrings", label: "Women's Earrings", image: collectionWomensEarrings, to: "/category/earrings" as const },
+  { slug: "chains", label: "Chains", image: categoryImage.chains, to: "/category/chains" as const },
+  { slug: "earrings", label: "Unisex Earrings", image: collectionUnisexEarrings, to: "/category/earrings" as const },
+  { slug: "pendants", label: "Charms", image: categoryImage.pendants, to: "/category/pendants" as const },
+  { slug: "pendants", label: "Chain and Charm Sets", image: collectionChainCharm, to: "/category/pendants" as const },
+  { slug: "watches", label: "All Watches", image: categoryImage.watches, to: "/category/watches" as const },
+  { slug: "pendants", label: "Memory Pendants", image: collectionMemory, to: "/category/pendants" as const },
 ];
 
 function HomePage() {
@@ -82,13 +99,8 @@ function HomePage() {
               Trusted by Generations,<br />
               <span className="text-gold">Loved</span> by Thousands
             </h2>
-            <p className="mt-6 text-foreground/70">
-              Family jewelers for over three decades — solid gold, natural diamonds,
-              and pieces designed to be handed down.
-            </p>
-            <div className="mt-8 flex flex-wrap gap-4">
+            <div className="mt-8">
               <Link to="/shop" className="btn-gold">Shop Now <ArrowRight className="h-3 w-3" /></Link>
-              <a href="https://wa.me/19296892205" className="btn-ghost-gold">Book Appointment</a>
             </div>
           </motion.div>
         </div>
@@ -96,12 +108,13 @@ function HomePage() {
 
       {/* TRUST STRIP */}
       <section className="border-y border-foreground/10 bg-background">
-        <div className="container-luxe grid grid-cols-2 md:grid-cols-4 gap-6 py-8 text-center">
+        <div className="container-luxe grid grid-cols-2 md:grid-cols-5 gap-6 py-8 text-center">
           {[
             { Icon: Truck, t: "Express Overnight Delivery", d: "Insured & signed for" },
             { Icon: ShieldCheck, t: "Safe & Secure Checkout", d: "Encrypted payments" },
-            { Icon: Award, t: "Trusted for 35 Years", d: "Family-run since 1990" },
-            { Icon: Diamond, t: "Natural Earth-Mined Diamonds", d: "Certified & conflict-free" },
+            { Icon: Award, t: "Trusted for 35 Years", d: "Family-run since 1991" },
+            { Icon: Users, t: "Loved by Thousands of Customers", d: "Trusted by generations" },
+            { Icon: Diamond, t: "Natural Earth Mined Diamonds", d: "Certified & conflict-free" },
           ].map(({ Icon, t, d }) => (
             <div key={t} className="flex flex-col items-center gap-2">
               <Icon className="h-6 w-6 text-gold" />
@@ -112,30 +125,70 @@ function HomePage() {
         </div>
       </section>
 
-      {/* CATEGORIES CAROUSEL */}
-      <section className="container-luxe py-20">
-        <div className="text-center mb-12">
-          <div className="eyebrow">Shop by Category</div>
-          <h2 className="font-display text-4xl md:text-5xl mt-3">The Collections</h2>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6">
-          {CATS.map((c, i) => (
+      {/* TOP CATEGORY STRIP */}
+      <section className="container-luxe py-16">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+          {TOP_CATS.map((c, i) => (
             <motion.div
-              key={c.slug}
+              key={c.label}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: i * 0.05 }}
             >
-              <Link to="/category/$slug" params={{ slug: c.slug }} className="group block relative aspect-[3/4] overflow-hidden">
+              <Link to="/category/$slug" params={{ slug: c.slug }} className="group block relative aspect-[4/3] overflow-hidden">
                 <img src={categoryImage[c.slug]} alt={c.label} loading="lazy"
                   className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
                 <div className="absolute inset-x-0 bottom-0 p-6 text-center text-white">
                   <h3 className="font-display text-2xl md:text-3xl">{c.label}</h3>
-                  <div className="mt-2 text-[10px] tracking-[0.3em] uppercase text-[var(--gold-soft)] opacity-0 group-hover:opacity-100 transition-opacity">
-                    Shop →
-                  </div>
+                </div>
+              </Link>
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
+      {/* SPECIALIZE BAND */}
+      <section className="grid md:grid-cols-2 min-h-[50vh]">
+        <div className="relative min-h-[40vh]">
+          <img
+            src={specializeImg}
+            alt="Natural earth-mined diamond jewelry by Marchello The Jeweler"
+            className="absolute inset-0 h-full w-full object-cover"
+            loading="lazy"
+          />
+        </div>
+        <div className="flex items-center bg-[oklch(0.97_0.01_85)]">
+          <div className="px-8 md:px-16 py-20 max-w-xl mx-auto text-center md:text-left">
+            <h2 className="font-display text-3xl md:text-5xl leading-tight">
+              We specialize in natural real earth mined diamonds, at the best prices in the world!
+            </h2>
+            <p className="mt-6 text-foreground/60 tracking-[0.25em] uppercase text-sm">Established 1991</p>
+          </div>
+        </div>
+      </section>
+
+      {/* DISCOVER THE COLLECTIONS */}
+      <section className="container-luxe py-20">
+        <div className="text-center mb-12">
+          <h2 className="font-display text-4xl md:text-5xl">Discover the Collections</h2>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-5">
+          {DISCOVER_COLLECTIONS.map((c, i) => (
+            <motion.div
+              key={`${c.label}-${i}`}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: i * 0.03 }}
+            >
+              <Link to={c.to} className="group block relative aspect-[3/4] overflow-hidden">
+                <img src={c.image} alt={c.label} loading="lazy"
+                  className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+                <div className="absolute inset-x-0 bottom-0 p-4 text-center text-white">
+                  <h3 className="font-display text-lg md:text-xl">{c.label}</h3>
                 </div>
               </Link>
             </motion.div>
@@ -148,12 +201,11 @@ function HomePage() {
         <div className="container-luxe py-20 grid md:grid-cols-2 gap-10 items-center">
           <div>
             <div className="text-xs tracking-[0.3em] uppercase text-[var(--gold)]">Personal Jewelry Consultant</div>
-            <h2 className="font-display text-4xl md:text-5xl mt-4">Make an Appointment</h2>
+            <h2 className="font-display text-4xl md:text-5xl mt-4">Make An Appointment</h2>
             <p className="mt-4 text-white/70 max-w-md">
               Schedule an appointment with us to view and purchase high-quality jewelry.
-              Our specialists will help you find the perfect piece.
             </p>
-            <a href="https://wa.me/19296892205" className="btn-gold mt-8 inline-flex">Book Now</a>
+            <a href="https://wa.me/19296891990" className="btn-gold mt-8 inline-flex">Schedule an Appointment Today</a>
           </div>
           <div className="grid grid-cols-2 gap-4">
             {[
@@ -228,27 +280,37 @@ function HomePage() {
         </div>
       </section>
 
-      {/* NEWSLETTER */}
-      <section className="container-luxe py-24 text-center">
-        <div className="eyebrow">The List</div>
-        <h2 className="font-display text-4xl md:text-5xl mt-3 max-w-2xl mx-auto">
-          Be first to see new releases.
-        </h2>
-        <p className="mt-4 text-foreground/60 max-w-lg mx-auto">
-          Join the Marchello list for private previews and 10% off your first piece.
-        </p>
-        <form
-          onSubmit={(e) => e.preventDefault()}
-          className="mt-8 max-w-md mx-auto flex flex-col sm:flex-row gap-3"
-        >
-          <input
-            type="email"
-            required
-            placeholder="your@email.com"
-            className="flex-1 bg-transparent border border-foreground/20 px-4 py-3 text-sm focus:border-[var(--gold)] focus:outline-none"
-          />
-          <button className="btn-gold">Subscribe</button>
-        </form>
+      {/* CONTACT CTA */}
+      <section className="bg-black text-white">
+        <div className="container-luxe py-20 text-center max-w-3xl mx-auto">
+          <h2 className="font-display text-4xl md:text-5xl">Ready to make a deal now? Contact us today.</h2>
+          <p className="mt-4 text-white/70">Your Personal Jewelry Shopper</p>
+          <p className="mt-6 text-white/80">
+            For a smooth and confident shopping experience, connect with our personal jewelry shopper
+            for assistance with selections and exclusive offers.
+          </p>
+          <p className="mt-8 text-lg">
+            Call / Text / WhatsApp:{" "}
+            <a href="tel:+19296891990" className="text-[var(--gold)] hover:underline">+1 (929) 689-1990</a> / Eden
+          </p>
+          <Link to="/contact" className="btn-gold mt-8 inline-flex">Contact us</Link>
+        </div>
+      </section>
+
+      {/* ABOUT US */}
+      <section className="container-luxe py-20 grid md:grid-cols-2 gap-12 items-center">
+        <div>
+          <h2 className="font-display text-4xl md:text-5xl">About Us</h2>
+          <p className="mt-6 text-foreground/70 leading-relaxed text-lg">
+            With 35+ years of experience and over 1,000 happy customers, we specialize in natural,
+            earth-mined diamonds at some of the best prices in the world. Trusted, reliable, and
+            committed to quality.
+          </p>
+          <Link to="/about" className="btn-gold mt-8 inline-flex">Explore Now</Link>
+        </div>
+        <div className="relative aspect-[4/3] overflow-hidden">
+          <img src={heroBanner} alt="Marchello The Jeweler showroom" className="h-full w-full object-cover" loading="lazy" />
+        </div>
       </section>
     </>
   );
@@ -256,24 +318,31 @@ function HomePage() {
 
 const HERO_SLIDES = [
   {
+    img: heroBanner,
+    kicker: "35 Years, Natural Earth Mined Diamond",
+    title: "Trusted by Generations, Loved by Thousands",
+    sub: "",
+    cta: { to: "/shop", label: "Shop Now" },
+  },
+  {
     img: hero2,
-    kicker: "The Signature Collection",
-    title: "Solid Gold. Natural Diamonds.",
-    sub: "Handcrafted heirlooms designed to last generations.",
-    cta: { to: "/shop", label: "Shop the Collection" },
+    kicker: "Layaway Plan Available",
+    title: "25% Down Payment. Pay Over Time. No Credit Needed.",
+    sub: "",
+    cta: { to: "/contact", label: "Make An Appointment" },
   },
   {
     img: hero3,
-    kicker: "Timepieces",
-    title: "Watches Worth the Wait.",
-    sub: "Iced-out classics and pre-owned luxury watches.",
+    kicker: "All Watches",
+    title: "Luxury Timepieces",
+    sub: "Rolex, Cartier, Audemars Piguet and more.",
     cta: { to: "/category/watches", label: "Explore Watches" },
   },
   {
     img: hero4,
-    kicker: "Diamond Rings & Bracelets",
-    title: "Every Facet, Perfected.",
-    sub: "Certified natural earth-mined diamonds, set in 14k & 18k gold.",
+    kicker: "Engagement Rings",
+    title: "Natural Earth Mined Diamonds",
+    sub: "Hand-crafted in solid gold.",
     cta: { to: "/category/rings", label: "Shop Rings" },
   },
 ] as const;
@@ -324,8 +393,8 @@ function HeroCarousel() {
             <div className="text-[10px] md:text-xs tracking-[0.35em] uppercase text-[var(--gold)] mb-4">
               {slide.kicker}
             </div>
-            <h1 className="font-display text-4xl md:text-6xl leading-[1.05]">{slide.title}</h1>
-            <p className="mt-5 text-white/80 max-w-md">{slide.sub}</p>
+            <h1 className="font-display text-3xl md:text-5xl leading-[1.08]">{slide.title}</h1>
+            {slide.sub ? <p className="mt-5 text-white/80 max-w-md">{slide.sub}</p> : null}
             <Link to={slide.cta.to} className="btn-gold mt-8 inline-flex">
               {slide.cta.label} <ArrowRight className="h-3 w-3" />
             </Link>

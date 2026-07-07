@@ -43,7 +43,7 @@ export function SiteHeader() {
     <header className="sticky top-0 z-40 bg-background/95 backdrop-blur border-b border-foreground/10">
       {/* Announcement bar */}
       <div className="bg-black text-white text-[11px] md:text-xs tracking-wide text-center py-2 px-4">
-        Due to fluctuations in gold prices, some items are subject to price changes.
+        Due to fluctuations in gold prices, some items are subject to price changes. If there is any increase after your order is placed, we will contact you before processing your order.
       </div>
 
       <div className="container-luxe flex items-center justify-between gap-4 py-4">

@@ -85,7 +85,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           description: "Luxury fine jewelry house crafting 18k gold and ethically sourced diamond pieces.",
           url: "/",
           logo: "/favicon.ico",
-          foundingDate: "2010",
+          foundingDate: "1991",
           sameAs: [
             "https://instagram.com/marchello",
             "https://facebook.com/marchello",
