@@ -16,15 +16,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let mounted = true;
-    supabase.auth.getSession().then(({ data }) => {
-      if (!mounted) return;
-      setSession(data.session);
-      setLoading(false);
-    });
-    const { data: sub } = supabase.auth.onAuthStateChange((_evt, s) => {
-      setSession(s);
-    });
-    return () => { mounted = false; sub.subscription.unsubscribe(); };
+    let unsubscribe: (() => void) | undefined;
+
+    (async () => {
+      try {
+        const { data } = await supabase.auth.getSession();
+        if (!mounted) return;
+        setSession(data.session);
+
+        const { data: sub } = supabase.auth.onAuthStateChange((_evt, s) => {
+          setSession(s);
+        });
+        unsubscribe = () => sub.subscription.unsubscribe();
+      } catch (error) {
+        // Allow the app shell to render even if Supabase config is missing in deployment.
+        console.error("[AuthProvider] Supabase is unavailable:", error);
+        if (mounted) {
+          setSession(null);
+        }
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    })();
+
+    return () => {
+      mounted = false;
+      unsubscribe?.();
+    };
   }, []);
 
   return (
@@ -32,7 +52,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       user: session?.user ?? null,
       session,
       loading,
-      signOut: async () => { await supabase.auth.signOut(); },
+      signOut: async () => {
+        try {
+          await supabase.auth.signOut();
+        } catch (error) {
+          console.error("[AuthProvider] Failed to sign out:", error);
+        }
+      },
     }}>
       {children}
     </Ctx.Provider>
