@@ -143,25 +143,25 @@ function HomePage() {
 
   return (
     <>
-      {/* SPLIT HERO */}
-      <section className="grid md:grid-cols-2 min-h-[520px] md:min-h-[600px]">
-        <div className="relative min-h-[320px] md:min-h-full bg-black">
+      {/* SPLIT HERO — 60/40 split matching marchellothejeweler.com slideshow */}
+      <section className="flex flex-col md:flex-row md:h-[95vh] min-h-[520px]">
+        <div className="relative w-full md:w-3/5 min-h-[55vh] md:min-h-0 md:h-full overflow-hidden bg-[#c9c9c9]">
           <img
             src={heroJeweler}
             alt="Marchello The Jeweler — in-store consultation"
-            className="absolute inset-0 h-full w-full object-cover object-top"
+            className="absolute inset-0 h-full w-full object-cover object-center"
             fetchPriority="high"
           />
         </div>
-        <div className="flex items-center bg-[#f3ece0]">
-          <div className="px-8 md:px-14 lg:px-20 py-16 max-w-xl">
-            <p className="text-sm text-foreground/65 mb-3">35 Years, Natural Earth Mined Diamond</p>
-            <h1 className="font-display text-3xl md:text-4xl lg:text-5xl leading-[1.1]">
-              Trusted by Generations,
-              <br />
-              Loved by Thousands
+        <div className="w-full md:w-2/5 flex items-center justify-center bg-[#fff9f4] md:h-full">
+          <div className="w-full text-center px-6 md:px-10 lg:px-14 py-10 md:py-12 max-w-2xl">
+            <p className="text-[0.99rem] md:text-[1.1rem] text-foreground/80 leading-tight mb-2">
+              35 Years, Natural Earth Mined Diamond
+            </p>
+            <h1 className="font-display text-[1.575rem] md:text-[3.15rem] leading-tight mt-1">
+              Trusted by Generations, Loved by Thousands
             </h1>
-            <Link to="/shop" className="btn-gold mt-8 inline-flex">
+            <Link to="/shop" className="btn-gold mt-6 md:mt-9 inline-flex">
               Shop Now <ArrowRight className="h-3 w-3" />
             </Link>
           </div>
