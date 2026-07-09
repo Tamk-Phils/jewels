@@ -30,3 +30,4 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+products_test.json

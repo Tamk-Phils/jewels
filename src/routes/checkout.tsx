@@ -5,6 +5,7 @@ import { useCart } from "@/lib/cart";
 import { useAuth } from "@/lib/auth";
 import { formatPrice } from "@/lib/format";
 import { supabase } from "@/integrations/supabase/client";
+import { sendOrderConfirmation } from "@/server/email";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({ meta: [{ title: "Checkout — Marchello" }] }),
@@ -74,6 +75,18 @@ function CheckoutPage() {
     if (itErr) {
       toast.error("Order saved but items failed");
     }
+
+    // Fire order confirmation emails (non-blocking — we don't await for UX speed)
+    sendOrderConfirmation({
+      data: {
+        order_number: order.order_number,
+        customer_email: form.email,
+        customer_name: form.full_name,
+        subtotal,
+        total,
+      },
+    }).catch((err) => console.error("Email notification failed:", err));
+
     clear();
     setStep(4);
     setSubmitting(false);

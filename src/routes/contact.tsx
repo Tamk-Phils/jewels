@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Mail, Phone, MapPin } from "lucide-react";
+import { sendContactEmail } from "@/server/email";
 
 export const Route = createFileRoute("/contact")({
   head: () => ({
@@ -18,6 +19,26 @@ export const Route = createFileRoute("/contact")({
 
 function ContactPage() {
   const [form, setForm] = useState({ name: "", email: "", message: "" });
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    try {
+      const result = await sendContactEmail({ data: form });
+      if (result.success) {
+        toast.success("Message sent. We'll be in touch.");
+        setForm({ name: "", email: "", message: "" });
+      } else {
+        toast.error("Failed to send message. Please try again.");
+      }
+    } catch {
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
     <div className="container-luxe py-20 grid md:grid-cols-2 gap-16 max-w-5xl">
       <div>
@@ -51,11 +72,13 @@ function ContactPage() {
           </li>
         </ul>
       </div>
-      <form onSubmit={(e) => { e.preventDefault(); toast.success("Message sent. We'll be in touch."); setForm({ name: "", email: "", message: "" }); }} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4">
         <input required placeholder="Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="contact-i" />
         <input required type="email" placeholder="Email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="contact-i" />
         <textarea required placeholder="Your message" rows={6} value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} className="contact-i" />
-        <button className="btn-gold">Send Message</button>
+        <button className="btn-gold" disabled={submitting}>
+          {submitting ? "Sending…" : "Send Message"}
+        </button>
         <style>{`.contact-i{width:100%;background:transparent;border:1px solid rgba(255,255,255,.18);padding:.85rem 1rem;color:white;font-size:.9rem}.contact-i:focus{outline:none;border-color:var(--gold)}`}</style>
       </form>
     </div>
