@@ -48,12 +48,11 @@ function useBodyScrollLock(active: boolean) {
 
     body.style.overflow = "hidden";
     html.style.overflow = "hidden";
-    body.style.touchAction = "none";
+    // NOTE: do NOT set touch-action:none on body — it blocks all touch events globally
 
     return () => {
       body.style.overflow = prevBodyOverflow;
       html.style.overflow = prevHtmlOverflow;
-      body.style.touchAction = "";
       window.scrollTo(0, scrollY);
     };
   }, [active]);
@@ -76,7 +75,7 @@ export function SiteHeader() {
   }, [open]);
 
   return (
-    <header className="sticky top-0 z-40 bg-background/95 backdrop-blur border-b border-foreground/10">
+    <header className="sticky top-0 z-40 bg-background border-b border-foreground/10">
       {/* Announcement bar */}
       <div className="bg-black text-white text-[10px] sm:text-[11px] md:text-xs tracking-wide text-center py-2 px-3 sm:px-4 leading-snug">
         Due to fluctuations in gold prices, some items are subject to price changes. If there is any increase after your order is placed, we will contact you before processing your order.

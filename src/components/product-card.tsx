@@ -34,7 +34,7 @@ export function ProductCard({
           src={img}
           alt={p.name}
           loading="lazy"
-          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+          className="h-full w-full object-cover md:transition-transform md:duration-500 md:group-hover:scale-105"
         />
         {p.is_new && (
           <span className="absolute top-3 left-3 text-[10px] tracking-[0.2em] uppercase bg-black/60 text-white px-2 py-1">

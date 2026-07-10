@@ -114,7 +114,8 @@ function HomePage() {
         .from("products")
         .select("id,name,slug,price,sale_price,is_new,is_bestseller,is_featured,images,media,category:categories(slug,name)")
         .eq("is_published", true)
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .limit(50);
       if (error) throw error;
       return (data ?? []) as unknown as HomeProduct[];
     },

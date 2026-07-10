@@ -78,6 +78,10 @@
   * { border-color: var(--color-border); }
   html, body { background: var(--color-background); color: var(--color-foreground); }
   body { font-family: var(--font-sans); -webkit-font-smoothing: antialiased; }
+  /* Eliminate 300ms tap delay on all interactive elements */
+  a, button, [role="button"], input, select, textarea, label {
+    touch-action: manipulation;
+  }
   h1, h2, h3, h4, .font-display { font-family: var(--font-display); letter-spacing: -0.01em; }
   ::selection { background: var(--gold); color: #000; }
 }
@@ -101,8 +105,8 @@
 }
 
 @utility glass {
-  background: color-mix(in oklab, white 75%, transparent);
-  backdrop-filter: blur(14px) saturate(140%);
+  background: color-mix(in oklab, white 88%, transparent);
+  /* backdrop-filter is extremely GPU-heavy on mobile — use a solid-ish bg instead */
   border-bottom: 1px solid color-mix(in oklab, var(--foreground) 8%, transparent);
 }
 
@@ -163,5 +167,8 @@
 }
 
 @utility animate-fade-up {
-  animation: fade-up 0.7s ease-out both;
+  /* Only animate when the user has not requested reduced motion and on non-touch (desktop) */
+  @media (prefers-reduced-motion: no-preference) and (hover: hover) {
+    animation: fade-up 0.5s ease-out both;
+  }
 }
