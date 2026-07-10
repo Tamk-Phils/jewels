@@ -2,7 +2,6 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Mail, Phone, MapPin } from "lucide-react";
-import { sendContactEmail } from "@/server/email";
 
 export const Route = createFileRoute("/contact")({
   head: () => ({
@@ -25,7 +24,12 @@ function ContactPage() {
     e.preventDefault();
     setSubmitting(true);
     try {
-      const result = await sendContactEmail({ data: form });
+      const response = await fetch('/.netlify/functions/email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'contact', payload: form }),
+      });
+      const result = await response.json();
       if (result.success) {
         toast.success("Message sent. We'll be in touch.");
         setForm({ name: "", email: "", message: "" });

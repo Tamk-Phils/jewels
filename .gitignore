@@ -31,3 +31,7 @@ dist-ssr
 *.sln
 *.sw?
 products_test.json
+
+# Environment variables (secrets)
+.env
+.env.*

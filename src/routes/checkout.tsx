@@ -5,12 +5,12 @@ import { useCart } from "@/lib/cart";
 import { useAuth } from "@/lib/auth";
 import { formatPrice } from "@/lib/format";
 import { supabase } from "@/integrations/supabase/client";
-import { sendOrderConfirmation } from "@/server/email";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({ meta: [{ title: "Checkout — Marchello" }] }),
   component: CheckoutPage,
 });
+
 
 type Step = 1 | 2 | 3 | 4;
 
@@ -77,14 +77,19 @@ function CheckoutPage() {
     }
 
     // Fire order confirmation emails (non-blocking — we don't await for UX speed)
-    sendOrderConfirmation({
-      data: {
-        order_number: order.order_number,
-        customer_email: form.email,
-        customer_name: form.full_name,
-        subtotal,
-        total,
-      },
+    fetch('/.netlify/functions/email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'order',
+        payload: {
+          order_number: order.order_number,
+          customer_email: form.email,
+          customer_name: form.full_name,
+          subtotal,
+          total,
+        }
+      })
     }).catch((err) => console.error("Email notification failed:", err));
 
     clear();

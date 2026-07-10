@@ -12,6 +12,7 @@ async function fetchProducts() {
 
 function escapeSql(str) {
   if (!str) return '';
+  if (typeof str !== 'string') str = String(str);
   return str.replace(/'/g, "''");
 }
 
@@ -37,16 +38,27 @@ async function generateSeed() {
     const images = (p.images || []).map(img => img.src);
     const imagesJson = escapeSql(JSON.stringify(images));
 
+    // SEO Data
+    const focusKeyphrase = name;
+    const seoTitle = escapeSql(`${p.title} | Lumina Luxe Jewels`);
+    const plainDescription = p.body_html ? p.body_html.replace(/<[^>]+>/g, '').trim() : p.title;
+    const seoMetaDescription = escapeSql(plainDescription.substring(0, 160));
+    const tags = p.tags ? escapeSql(p.tags) : '';
+
     // For products, category_id is usually a UUID. Since we don't know the categories, we can set it to NULL
     // or leave it out if it has a default, but since it's an FK, NULL is safe.
     
-    sql += `INSERT INTO public.products (name, slug, description, price, images, is_published, stock)\n`;
-    sql += `VALUES ('${name}', '${slug}', '${description}', ${price}, '${imagesJson}'::jsonb, true, 10)\n`;
+    sql += `INSERT INTO public.products (name, slug, description, price, images, is_published, stock, focus_keyphrase, seo_title, seo_meta_description, tags)\n`;
+    sql += `VALUES ('${name}', '${slug}', '${description}', ${price}, '${imagesJson}'::jsonb, true, 10, '${focusKeyphrase}', '${seoTitle}', '${seoMetaDescription}', '${tags}')\n`;
     sql += `ON CONFLICT (slug) DO UPDATE SET\n`;
     sql += `  name = EXCLUDED.name,\n`;
     sql += `  description = EXCLUDED.description,\n`;
     sql += `  price = EXCLUDED.price,\n`;
-    sql += `  images = EXCLUDED.images;\n\n`;
+    sql += `  images = EXCLUDED.images,\n`;
+    sql += `  focus_keyphrase = EXCLUDED.focus_keyphrase,\n`;
+    sql += `  seo_title = EXCLUDED.seo_title,\n`;
+    sql += `  seo_meta_description = EXCLUDED.seo_meta_description,\n`;
+    sql += `  tags = EXCLUDED.tags;\n\n`;
   }
 
   const outPath = path.join(process.cwd(), 'supabase', 'seed.sql');

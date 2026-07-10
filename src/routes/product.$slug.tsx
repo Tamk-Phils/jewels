@@ -193,7 +193,10 @@ function ProductPage() {
               {sale && <span className="text-foreground/40 line-through">{formatPrice(price)}</span>}
             </div>
 
-            <p className="mt-6 text-foreground/70 leading-relaxed">{product.description}</p>
+            <div 
+              className="mt-6 text-foreground/70 leading-relaxed [&>ul]:list-disc [&>ul]:ml-5 [&>p]:mt-4 [&>h3]:mt-6 [&>h3]:text-white [&>h3]:font-medium"
+              dangerouslySetInnerHTML={{ __html: product.description || "" }} 
+            />
 
             <div className="mt-8 flex gap-3">
               <button
