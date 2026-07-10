@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ProductCard, type ProductCardProduct } from "@/components/product-card";
 import { categoryImage, productPrimaryImage } from "@/lib/product-image";
-import heroJeweler from "@/assets/hero-jeweler.png";
+import heroJeweler from "@/assets/hero-jeweler.jpg";
 import storefrontImg from "@/assets/storefront.jpg";
 import aboutContactImg from "@/assets/about-contact.jpg";
 import custom1 from "@/assets/custom-1.jpg";
@@ -150,6 +150,9 @@ function HomePage() {
           <img
             src={heroJeweler}
             alt="Marchello The Jeweler — in-store consultation"
+            width={1400}
+            height={933}
+            decoding="async"
             className="absolute inset-0 h-full w-full object-cover object-center"
             fetchPriority="high"
           />
