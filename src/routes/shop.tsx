@@ -5,6 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { ProductCard, type ProductCardProduct } from "@/components/product-card";
 import { SlidersHorizontal } from "lucide-react";
 
+const PAGE_SIZE = 24;
+
 export const Route = createFileRoute("/shop")({
   head: () => {
     const title = "Shop Luxury Fine Jewelry — 18k Gold & Diamonds | Marchello";
@@ -41,6 +43,7 @@ export function Shop({ categorySlug }: { categorySlug?: string } = {}) {
   const [gender, setGender] = useState<string | "all">("all");
   const [inStock, setInStock] = useState(false);
   const [openFilters, setOpenFilters] = useState(false);
+  const [page, setPage] = useState(1);
 
   const { data: cats = [] } = useQuery({
     queryKey: ["categories"],
@@ -79,6 +82,12 @@ export function Shop({ categorySlug }: { categorySlug?: string } = {}) {
     return list;
   }, [products, cat, material, gender, inStock, priceMax, sort]);
 
+  // Reset to page 1 whenever filters change
+  const visibleProducts = filtered.slice(0, page * PAGE_SIZE);
+  const hasMore = visibleProducts.length < filtered.length;
+
+  const resetPage = () => setPage(1);
+
   return (
     <div className="container-luxe py-12 md:py-20">
       <div className="text-center mb-10">
@@ -101,7 +110,7 @@ export function Shop({ categorySlug }: { categorySlug?: string } = {}) {
         <div className="ml-auto">
           <select
             value={sort}
-            onChange={(e) => setSort(e.target.value as typeof sort)}
+            onChange={(e) => { setSort(e.target.value as typeof sort); resetPage(); }}
             className="bg-transparent border border-white/20 px-3 py-2 text-xs uppercase tracking-[0.18em] focus:border-[var(--gold)] focus:outline-none"
           >
             <option value="new">Newest</option>
@@ -118,6 +127,7 @@ export function Shop({ categorySlug }: { categorySlug?: string } = {}) {
             <Filter title="Category">
               <select value={cat} onChange={(e) => {
                 const v = e.target.value;
+                resetPage();
                 if (v === "all") setCat("all");
                 else navigate({ to: "/category/$slug", params: { slug: v } });
               }} className="filter-input">
@@ -127,7 +137,7 @@ export function Shop({ categorySlug }: { categorySlug?: string } = {}) {
             </Filter>
           )}
           <Filter title="Material">
-            <select value={material} onChange={(e) => setMaterial(e.target.value)} className="filter-input">
+            <select value={material} onChange={(e) => { setMaterial(e.target.value); resetPage(); }} className="filter-input">
               <option value="all">All</option>
               <option value="18k Gold">18k Gold</option>
               <option value="14k Gold">14k Gold</option>
@@ -135,7 +145,7 @@ export function Shop({ categorySlug }: { categorySlug?: string } = {}) {
             </select>
           </Filter>
           <Filter title="Gender">
-            <select value={gender} onChange={(e) => setGender(e.target.value)} className="filter-input">
+            <select value={gender} onChange={(e) => { setGender(e.target.value); resetPage(); }} className="filter-input">
               <option value="all">All</option>
               <option value="Women">Women</option>
               <option value="Men">Men</option>
@@ -144,12 +154,12 @@ export function Shop({ categorySlug }: { categorySlug?: string } = {}) {
           </Filter>
           <Filter title={`Max Price: $${priceMax.toLocaleString()}`}>
             <input type="range" min={500} max={10000} step={100} value={priceMax}
-              onChange={(e) => setPriceMax(Number(e.target.value))}
+              onChange={(e) => { setPriceMax(Number(e.target.value)); resetPage(); }}
               className="w-full accent-[var(--gold)]" />
           </Filter>
           <Filter title="Availability">
             <label className="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" checked={inStock} onChange={(e) => setInStock(e.target.checked)}
+              <input type="checkbox" checked={inStock} onChange={(e) => { setInStock(e.target.checked); resetPage(); }}
                 className="accent-[var(--gold)]" />
               In stock only
             </label>
@@ -160,20 +170,32 @@ export function Shop({ categorySlug }: { categorySlug?: string } = {}) {
           {isLoading ? (
             <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
               {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="aspect-[4/5] bg-white/5 animate-pulse" />
+                <div key={i} className="aspect-[4/5] bg-foreground/5 animate-pulse" />
               ))}
             </div>
           ) : filtered.length === 0 ? (
             <div className="text-center py-20 text-foreground/50">No pieces match these filters.</div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-8">
-              {filtered.map((p) => <ProductCard key={p.id} p={p} />)}
-            </div>
+            <>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-8">
+                {visibleProducts.map((p) => <ProductCard key={p.id} p={p} />)}
+              </div>
+              {hasMore && (
+                <div className="text-center mt-12">
+                  <button
+                    onClick={() => setPage((n) => n + 1)}
+                    className="btn-ghost-gold"
+                  >
+                    Load More ({filtered.length - visibleProducts.length} remaining)
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
 
-      <style>{`.filter-input{width:100%;background:transparent;border:1px solid rgba(255,255,255,.2);padding:.5rem .75rem;color:white;font-size:.85rem}`}</style>
+      <style>{`.filter-input{width:100%;background:transparent;border:1px solid rgba(0,0,0,.15);padding:.5rem .75rem;font-size:.85rem}`}</style>
     </div>
   );
 }

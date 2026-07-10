@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { Link } from "@tanstack/react-router";
 import { Menu, Search, ShoppingBag, User, X, ChevronDown } from "lucide-react";
 import { useCart } from "@/lib/cart";
 import logoCrest from "@/assets/logo-crest.png";
@@ -36,34 +35,12 @@ const NAV: NavItem[] = [
   { to: "/faq", label: "FAQ" },
 ];
 
-function useBodyScrollLock(active: boolean) {
-  useEffect(() => {
-    if (!active || typeof document === "undefined") return;
-
-    const scrollY = window.scrollY;
-    const body = document.body;
-    const html = document.documentElement;
-    const prevBodyOverflow = body.style.overflow;
-    const prevHtmlOverflow = html.style.overflow;
-
-    body.style.overflow = "hidden";
-    html.style.overflow = "hidden";
-    // NOTE: do NOT set touch-action:none on body — it blocks all touch events globally
-
-    return () => {
-      body.style.overflow = prevBodyOverflow;
-      html.style.overflow = prevHtmlOverflow;
-      window.scrollTo(0, scrollY);
-    };
-  }, [active]);
-}
-
 export function SiteHeader() {
   const { count } = useCart();
   const [open, setOpen] = useState(false);
 
   const closeMenu = useCallback(() => setOpen(false), []);
-  const toggleMenu = useCallback(() => setOpen((v) => !v), []);
+  const openMenu = useCallback(() => setOpen(true), []);
 
   useEffect(() => {
     if (!open) return;
@@ -76,7 +53,6 @@ export function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-40 bg-background border-b border-foreground/10">
-      {/* Announcement bar */}
       <div className="bg-black text-white text-[10px] sm:text-[11px] md:text-xs tracking-wide text-center py-2 px-3 sm:px-4 leading-snug">
         Due to fluctuations in gold prices, some items are subject to price changes. If there is any increase after your order is placed, we will contact you before processing your order.
       </div>
@@ -84,16 +60,15 @@ export function SiteHeader() {
       <div className="container-luxe flex items-center justify-between gap-2 sm:gap-4 py-3 sm:py-4">
         <button
           type="button"
-          className="md:hidden p-2 -ml-2 min-h-11 min-w-11 flex items-center justify-center touch-manipulation"
-          onClick={toggleMenu}
-          aria-label={open ? "Close menu" : "Open menu"}
+          className="md:hidden p-2 -ml-2 min-h-11 min-w-11 flex items-center justify-center"
+          onClick={openMenu}
+          aria-label="Open menu"
           aria-expanded={open}
           aria-controls="mobile-nav"
         >
-          {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          <Menu className="h-5 w-5" />
         </button>
 
-        {/* Crest logo */}
         <a href="/" className="flex items-center shrink-0 min-w-0" aria-label="Marchello The Jeweler">
           <img
             src={logoCrest}
@@ -104,7 +79,6 @@ export function SiteHeader() {
           />
         </a>
 
-        {/* Desktop nav with mega-menu hover */}
         <nav className="hidden md:flex items-center gap-7 text-[13px] font-medium">
           <a href="/" className="hover:text-gold">Home</a>
           {NAV.map((n) =>
@@ -159,14 +133,6 @@ export function SiteHeader() {
 }
 
 function MobileMenu({ onClose }: { onClose: () => void }) {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useBodyScrollLock(true);
-
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
@@ -175,30 +141,31 @@ function MobileMenu({ onClose }: { onClose: () => void }) {
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [onClose]);
 
-  if (!mounted || typeof document === "undefined") return null;
-
-  return createPortal(
+  const menu = (
     <div
       id="mobile-nav"
       role="dialog"
       aria-modal="true"
       aria-label="Navigation menu"
       className="fixed inset-0 z-[9999] flex flex-col bg-background md:hidden"
-      style={{ backgroundColor: "var(--background)" }}
+      style={{ height: "100dvh", backgroundColor: "var(--background)" }}
     >
       <div className="shrink-0 container-luxe flex items-center justify-between py-3 border-b border-foreground/10">
         <img src={logoCrest} alt="Marchello" className="h-12 w-auto" />
         <button
           type="button"
           onClick={onClose}
-          className="p-2 min-h-11 min-w-11 flex items-center justify-center touch-manipulation"
+          className="p-2 min-h-11 min-w-11 flex items-center justify-center"
           aria-label="Close menu"
         >
           <X className="h-5 w-5" />
         </button>
       </div>
 
-      <nav className="flex-1 min-h-0 overflow-y-auto overscroll-contain container-luxe flex flex-col gap-1 pb-10 pt-2">
+      <nav
+        className="flex-1 min-h-0 overflow-y-auto overscroll-contain container-luxe flex flex-col gap-1 pb-10 pt-2"
+        style={{ WebkitOverflowScrolling: "touch" }}
+      >
         <MobileNavLink to="/" onClose={onClose}>Home</MobileNavLink>
         {NAV.map((n) => (
           <div key={n.label}>
@@ -217,9 +184,10 @@ function MobileMenu({ onClose }: { onClose: () => void }) {
         <MobileNavLink to="/account" onClose={onClose}>Account</MobileNavLink>
         <MobileNavLink to="/cart" onClose={onClose}>Cart</MobileNavLink>
       </nav>
-    </div>,
-    document.body,
+    </div>
   );
+
+  return createPortal(menu, document.body);
 }
 
 function MobileNavLink({
@@ -234,16 +202,16 @@ function MobileNavLink({
   sub?: boolean;
 }) {
   return (
-    <Link
-      to={to}
+    <a
+      href={to}
       onClick={onClose}
       className={
         sub
-          ? "text-sm text-foreground/70 hover:text-gold py-1"
+          ? "text-sm text-foreground/70 hover:text-gold py-1 block"
           : "font-display text-2xl py-3 border-b border-foreground/10 block"
       }
     >
       {children}
-    </Link>
+    </a>
   );
 }
