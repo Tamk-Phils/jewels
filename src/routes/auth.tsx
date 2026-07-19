@@ -86,13 +86,13 @@ function AuthPage() {
 
       <form onSubmit={submit} className="space-y-4">
         {mode === "signup" && (
-          <input placeholder="Full name" required value={name} onChange={(e) => setName(e.target.value)} className="auth-input" />
+          <input placeholder="Full name" required value={name} onChange={(e) => setName(e.target.value)} className="w-full bg-white text-black border border-gray-300 rounded px-4 py-3 focus:border-black focus:outline-none" />
         )}
-        <input type="email" placeholder="Email" required value={email} onChange={(e) => setEmail(e.target.value)} className="auth-input" />
+        <input type="email" placeholder="Email" required value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-white text-black border border-gray-300 rounded px-4 py-3 focus:border-black focus:outline-none" />
         {mode !== "reset" && (
-          <input type="password" placeholder="Password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} className="auth-input" />
+          <input type="password" placeholder="Password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} className="w-full bg-white text-black border border-gray-300 rounded px-4 py-3 focus:border-black focus:outline-none" />
         )}
-        <button className="btn-gold w-full" disabled={busy}>
+        <button className="btn-gold w-full py-3" disabled={busy}>
           {mode === "signin" && "Sign In"}
           {mode === "signup" && "Create Account"}
           {mode === "reset" && "Send Reset Link"}
@@ -121,7 +121,6 @@ function AuthPage() {
           <button onClick={() => setMode("signin")} className="hover:text-gold">Back to sign in</button>
         )}
       </div>
-      <style>{`.auth-input{width:100%;background:transparent;border:1px solid rgba(255,255,255,.18);padding:.85rem 1rem;color:white;font-size:.9rem}.auth-input:focus{outline:none;border-color:var(--gold)}`}</style>
     </div>
   );
 }
