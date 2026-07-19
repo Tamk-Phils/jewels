@@ -111,6 +111,48 @@ function categorySlug(p: HomeProduct) {
 }
 
 function HomePage() {
+  const { data: products = [] } = useQuery({
+    queryKey: ["home-products"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("products")
+        .select("id,name,slug,price,sale_price,is_new,is_bestseller,is_featured,images,media,material,gender,category:categories(slug,name)")
+        .eq("is_published", true)
+        .order("created_at", { ascending: false })
+        .limit(50);
+      if (error) throw error;
+      return (data ?? []) as unknown as HomeProduct[];
+    },
+  });
+
+  const [productTab, setProductTab] = useState<"popular" | "all" | "bestsellers">("popular");
+  const [watchTab, setWatchTab] = useState<"mens" | "womens" | "diamond">("mens");
+
+  const tabProducts =
+    productTab === "popular"
+      ? products.filter((p) => p.is_featured).slice(0, 8)
+      : productTab === "bestsellers"
+        ? products.filter((p) => p.is_bestseller).slice(0, 8)
+        : products.slice(0, 8);
+
+  const displayProducts = tabProducts.length > 0 ? tabProducts : products.slice(0, 8);
+
+  const ringsUnder5000 = products
+    .filter((p) => categorySlug(p) === "rings" && effectivePrice(p) < 5000)
+    .slice(0, 5);
+  const ringFeatured = ringsUnder5000[0];
+  const ringGrid = ringsUnder5000.slice(1, 5);
+
+  const watchProducts = products
+    .filter((p) => categorySlug(p) === "watches")
+    .filter((p) => {
+      if (watchTab === "mens") return p.gender === "Men";
+      if (watchTab === "womens") return p.gender === "Women";
+      if (watchTab === "diamond") return p.material?.toLowerCase().includes("diamond");
+      return true;
+    })
+    .slice(0, 5);
+
   const { data: chains = [] } = useQuery({
     queryKey: ["home-chains"],
     queryFn: async () => {
