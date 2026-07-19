@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useState, memo } from "react";
+
 import { toast } from "sonner";
 import { useCart } from "@/lib/cart";
 import { useAuth } from "@/lib/auth";
@@ -28,32 +28,37 @@ type CheckoutFormData = {
 };
 
 function CheckoutPage() {
-  const { items, subtotal, clear } = useCart();
+  const { items, subtotal, clear, isLoaded } = useCart();
   const { user } = useAuth();
   const nav = useNavigate();
   const [step, setStep] = useState<Step>(1);
   const [submitting, setSubmitting] = useState(false);
 
-  const { register, handleSubmit, setValue } = useForm<CheckoutFormData>({
-    defaultValues: {
-      full_name: "",
-      email: user?.email ?? "",
-      phone: "",
-      line1: "",
-      line2: "",
-      city: "",
-      state: "",
-      postal_code: "",
-      country: "United States",
-      payment_method: "stripe",
-    },
+  const [formData, setFormData] = useState<CheckoutFormData>({
+    full_name: "",
+    email: user?.email ?? "",
+    phone: "",
+    line1: "",
+    line2: "",
+    city: "",
+    state: "",
+    postal_code: "",
+    country: "United States",
+    payment_method: "stripe",
   });
 
-  const [paymentMethod, setPaymentMethod] = useState<string>("stripe");
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
 
   const shipping = subtotal > 0 && subtotal < 500 ? 25 : 0;
   const tax = Math.round(subtotal * 0.08);
   const total = subtotal + shipping + tax;
+
+  if (!isLoaded) {
+    return null; // or a loading spinner
+  }
 
   if (items.length === 0) {
     return (
@@ -64,7 +69,9 @@ function CheckoutPage() {
     );
   }
 
-  const onSubmit = async (data: CheckoutFormData) => {
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const data = formData;
     if (!user) {
       toast.error("Please sign in to place an order");
       nav({ to: "/auth", search: { redirect: "/checkout" } as never });
@@ -143,25 +150,52 @@ function CheckoutPage() {
       </div>
 
       <div className="grid lg:grid-cols-[1fr_380px] gap-10 items-start">
-        <form onSubmit={handleSubmit(onSubmit)} className="w-full">
+        <form onSubmit={onSubmit} autoComplete="off" className="w-full">
           {step === 1 && (
             <div className="bg-white text-black p-6 md:p-8 rounded-lg shadow-sm border border-gray-200">
               <h2 className="font-display text-2xl mb-6">Shipping Address</h2>
               <div className="space-y-4">
-                <Field label="Full Name" name="full_name" register={register} />
+                <label className="block w-full">
+                  <span className="block text-[11px] uppercase tracking-wider text-gray-500 mb-1.5 font-medium">Full Name</span>
+                  <input type="text" name="full_name" value={formData.full_name} onChange={handleChange} className="w-full bg-white text-black border border-gray-300 rounded px-4 py-2.5 focus:border-black focus:ring-1 focus:ring-black focus:outline-none transition-shadow" required />
+                </label>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Field label="Email" name="email" type="email" register={register} />
-                  <Field label="Phone" name="phone" type="tel" register={register} />
+                  <label className="block w-full">
+                    <span className="block text-[11px] uppercase tracking-wider text-gray-500 mb-1.5 font-medium">Email</span>
+                    <input type="email" name="email" value={formData.email} onChange={handleChange} className="w-full bg-white text-black border border-gray-300 rounded px-4 py-2.5 focus:border-black focus:ring-1 focus:ring-black focus:outline-none transition-shadow" required />
+                  </label>
+                  <label className="block w-full">
+                    <span className="block text-[11px] uppercase tracking-wider text-gray-500 mb-1.5 font-medium">Phone</span>
+                    <input type="tel" name="phone" value={formData.phone} onChange={handleChange} className="w-full bg-white text-black border border-gray-300 rounded px-4 py-2.5 focus:border-black focus:ring-1 focus:ring-black focus:outline-none transition-shadow" required />
+                  </label>
                 </div>
-                <Field label="Address" name="line1" register={register} />
-                <Field label="Apt, suite (optional)" name="line2" register={register} />
+                <label className="block w-full">
+                  <span className="block text-[11px] uppercase tracking-wider text-gray-500 mb-1.5 font-medium">Address</span>
+                  <input type="text" name="line1" value={formData.line1} onChange={handleChange} className="w-full bg-white text-black border border-gray-300 rounded px-4 py-2.5 focus:border-black focus:ring-1 focus:ring-black focus:outline-none transition-shadow" required />
+                </label>
+                <label className="block w-full">
+                  <span className="block text-[11px] uppercase tracking-wider text-gray-500 mb-1.5 font-medium">Apt, suite (optional)</span>
+                  <input type="text" name="line2" value={formData.line2} onChange={handleChange} className="w-full bg-white text-black border border-gray-300 rounded px-4 py-2.5 focus:border-black focus:ring-1 focus:ring-black focus:outline-none transition-shadow" />
+                </label>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Field label="City" name="city" register={register} />
-                  <Field label="State" name="state" register={register} />
+                  <label className="block w-full">
+                    <span className="block text-[11px] uppercase tracking-wider text-gray-500 mb-1.5 font-medium">City</span>
+                    <input type="text" name="city" value={formData.city} onChange={handleChange} className="w-full bg-white text-black border border-gray-300 rounded px-4 py-2.5 focus:border-black focus:ring-1 focus:ring-black focus:outline-none transition-shadow" required />
+                  </label>
+                  <label className="block w-full">
+                    <span className="block text-[11px] uppercase tracking-wider text-gray-500 mb-1.5 font-medium">State</span>
+                    <input type="text" name="state" value={formData.state} onChange={handleChange} className="w-full bg-white text-black border border-gray-300 rounded px-4 py-2.5 focus:border-black focus:ring-1 focus:ring-black focus:outline-none transition-shadow" required />
+                  </label>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Field label="ZIP Code" name="postal_code" register={register} />
-                  <Field label="Country" name="country" register={register} />
+                  <label className="block w-full">
+                    <span className="block text-[11px] uppercase tracking-wider text-gray-500 mb-1.5 font-medium">ZIP Code</span>
+                    <input type="text" name="postal_code" value={formData.postal_code} onChange={handleChange} className="w-full bg-white text-black border border-gray-300 rounded px-4 py-2.5 focus:border-black focus:ring-1 focus:ring-black focus:outline-none transition-shadow" required />
+                  </label>
+                  <label className="block w-full">
+                    <span className="block text-[11px] uppercase tracking-wider text-gray-500 mb-1.5 font-medium">Country</span>
+                    <input type="text" name="country" value={formData.country} onChange={handleChange} className="w-full bg-white text-black border border-gray-300 rounded px-4 py-2.5 focus:border-black focus:ring-1 focus:ring-black focus:outline-none transition-shadow" required />
+                  </label>
                 </div>
               </div>
               <div className="mt-8">
@@ -202,13 +236,10 @@ function CheckoutPage() {
                   <label key={m.id} className={`flex items-center gap-4 p-4 border rounded cursor-pointer transition-all ${paymentMethod === m.id ? "border-black bg-gray-50" : "border-gray-200 hover:border-gray-300"}`}>
                     <input 
                       type="radio" 
+                      name="payment_method"
                       value={m.id} 
-                      {...register("payment_method")}
-                      checked={paymentMethod === m.id}
-                      onChange={() => {
-                        setPaymentMethod(m.id);
-                        setValue("payment_method", m.id);
-                      }}
+                      checked={formData.payment_method === m.id}
+                      onChange={handleChange}
                       className="h-4 w-4 text-black focus:ring-black border-gray-300" 
                     />
                     <div>
@@ -246,53 +277,47 @@ function CheckoutPage() {
           )}
         </form>
 
-        {step !== 4 && (
-          <aside className="bg-gray-50 text-black border border-gray-200 p-6 rounded-lg h-fit">
-            <h3 className="font-display text-xl mb-6">Order Summary</h3>
-            <div className="space-y-4 mb-6">
-              {items.map((i) => (
-                <div key={i.id} className="flex gap-4 items-start">
-                  <div className="h-16 w-16 bg-gray-200 rounded overflow-hidden shrink-0">
-                    {i.image ? (
-                      <img src={i.image} alt={i.name} className="h-full w-full object-cover" />
-                    ) : null}
-                  </div>
-                  <div className="flex-1">
-                    <div className="text-sm font-medium leading-snug">{i.name}</div>
-                    <div className="text-xs text-gray-500 mt-1">Qty: {i.quantity}</div>
-                  </div>
-                  <div className="text-sm font-medium">{formatPrice(i.price * i.quantity)}</div>
-                </div>
-              ))}
-            </div>
-            <div className="border-t border-gray-200 pt-4 space-y-3 text-sm">
-              <Row k="Subtotal" v={formatPrice(subtotal)} />
-              <Row k="Shipping" v={shipping === 0 ? "Free" : formatPrice(shipping)} />
-              <Row k="Estimated Tax" v={formatPrice(tax)} />
-            </div>
-            <div className="border-t border-gray-200 pt-4 mt-4 flex justify-between font-display text-xl">
-              <span>Total</span>
-              <span className="text-black">{formatPrice(total)}</span>
-            </div>
-          </aside>
-        )}
+        {step !== 4 && <OrderSummary items={items} subtotal={subtotal} shipping={shipping} tax={tax} total={total} />}
       </div>
     </div>
   );
 }
 
-function Field({ label, name, type = "text", register }: { label: string; name: string; type?: string; register: any }) {
+const OrderSummary = memo(function OrderSummary({
+  items, subtotal, shipping, tax, total
+}: {
+  items: { id: string; image: string; name: string; price: number; quantity: number }[];
+  subtotal: number; shipping: number; tax: number; total: number;
+}) {
   return (
-    <label className="block w-full">
-      <span className="block text-[11px] uppercase tracking-wider text-gray-500 mb-1.5 font-medium">{label}</span>
-      <input 
-        type={type}
-        {...register(name)}
-        className="w-full bg-white text-black border border-gray-300 rounded px-4 py-2.5 focus:border-black focus:ring-1 focus:ring-black focus:outline-none transition-shadow" 
-      />
-    </label>
+    <aside className="bg-gray-50 text-black border border-gray-200 p-6 rounded-lg h-fit">
+      <h3 className="font-display text-xl mb-6">Order Summary</h3>
+      <div className="space-y-4 mb-6">
+        {items.map((i) => (
+          <div key={i.id} className="flex gap-4 items-start">
+            <div className="h-16 w-16 bg-gray-200 rounded overflow-hidden shrink-0">
+              {i.image ? <img src={i.image} alt={i.name} className="h-full w-full object-cover" /> : null}
+            </div>
+            <div className="flex-1">
+              <div className="text-sm font-medium leading-snug">{i.name}</div>
+              <div className="text-xs text-gray-500 mt-1">Qty: {i.quantity}</div>
+            </div>
+            <div className="text-sm font-medium">{formatPrice(i.price * i.quantity)}</div>
+          </div>
+        ))}
+      </div>
+      <div className="border-t border-gray-200 pt-4 space-y-3 text-sm">
+        <Row k="Subtotal" v={formatPrice(subtotal)} />
+        <Row k="Shipping" v={shipping === 0 ? "Free" : formatPrice(shipping)} />
+        <Row k="Estimated Tax" v={formatPrice(tax)} />
+      </div>
+      <div className="border-t border-gray-200 pt-4 mt-4 flex justify-between font-display text-xl">
+        <span>Total</span>
+        <span className="text-black">{formatPrice(total)}</span>
+      </div>
+    </aside>
   );
-}
+});
 
 function Row({ k, v }: { k: string; v: string }) {
   return <div className="flex justify-between"><span className="text-gray-500">{k}</span><span className="font-medium">{v}</span></div>;

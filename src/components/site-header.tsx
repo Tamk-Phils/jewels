@@ -1,12 +1,13 @@
-import { useCallback, useEffect, useState } from "react";
-import { createPortal } from "react-dom";
-import { Menu, Search, ShoppingBag, User, X, ChevronDown } from "lucide-react";
+import { useCallback, useState, lazy, Suspense } from "react";
+// MobileMenu moved to separate file; createPortal no longer needed
+import { Menu, Search, ShoppingBag, User, ChevronDown } from "lucide-react";
 import { useCart } from "@/lib/cart";
+const MobileMenu = lazy(() => import("./MobileMenu"));
 import logoCrest from "@/assets/logo-crest.png";
 
 type NavItem = { to: string; label: string; children?: { to: string; label: string }[] };
 
-const NAV: NavItem[] = [
+export const NAV: NavItem[] = [
   { to: "/shop", label: "Specials" },
   { to: "/shop", label: "Under $1500" },
   {
@@ -118,68 +119,19 @@ export function SiteHeader() {
         </div>
       </div>
 
-      {open && <MobileMenu onClose={closeMenu} />}
+      {open && (
+        <Suspense fallback={null}>
+          <MobileMenu onClose={closeMenu} />
+        </Suspense>
+      )}
     </header>
   );
 }
 
-function MobileMenu({ onClose }: { onClose: () => void }) {
-  useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", onKeyDown);
-    return () => document.removeEventListener("keydown", onKeyDown);
-  }, [onClose]);
 
-  const menu = (
-    <div
-      id="mobile-nav"
-      role="dialog"
-      aria-modal="true"
-      aria-label="Navigation menu"
-      className="fixed inset-0 z-[9999] flex flex-col bg-background md:hidden"
-      style={{ height: "100dvh", backgroundColor: "var(--background)" }}
-    >
-      <div className="shrink-0 container-luxe flex items-center justify-between py-3 border-b border-foreground/10">
-        <img src={logoCrest} alt="Marchello" className="h-12 w-auto" />
-        <button
-          type="button"
-          onClick={onClose}
-          className="p-2 min-h-11 min-w-11 flex items-center justify-center"
-          aria-label="Close menu"
-        >
-          <X className="h-5 w-5" />
-        </button>
-      </div>
 
-      <nav
-        className="flex-1 min-h-0 overflow-y-auto overscroll-contain container-luxe flex flex-col gap-1 pb-10 pt-2"
-        style={{ WebkitOverflowScrolling: "touch" }}
-      >
-        <MobileNavLink to="/" onClose={onClose}>Home</MobileNavLink>
-        {NAV.map((n) => (
-          <div key={n.label}>
-            <MobileNavLink to={n.to} onClose={onClose}>{n.label}</MobileNavLink>
-            {n.children && (
-              <div className="pl-4 py-2 flex flex-col gap-2 border-b border-foreground/10">
-                {n.children.map((c) => (
-                  <MobileNavLink key={c.label} to={c.to} onClose={onClose} sub>
-                    {c.label}
-                  </MobileNavLink>
-                ))}
-              </div>
-            )}
-          </div>
-        ))}
-        <MobileNavLink to="/account" onClose={onClose}>Account</MobileNavLink>
-        <MobileNavLink to="/cart" onClose={onClose}>Cart</MobileNavLink>
-      </nav>
-    </div>
-  );
 
-  return createPortal(menu, document.body);
-}
+
 
 function MobileNavLink({
   to,
