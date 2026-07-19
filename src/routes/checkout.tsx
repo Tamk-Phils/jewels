@@ -34,7 +34,7 @@ function CheckoutPage() {
   const [step, setStep] = useState<Step>(1);
   const [submitting, setSubmitting] = useState(false);
 
-  const { register, handleSubmit, watch, setValue } = useForm<CheckoutFormData>({
+  const { register, handleSubmit, setValue } = useForm<CheckoutFormData>({
     defaultValues: {
       full_name: "",
       email: user?.email ?? "",
@@ -49,7 +49,7 @@ function CheckoutPage() {
     },
   });
 
-  const payment_method = watch("payment_method");
+  const [paymentMethod, setPaymentMethod] = useState<string>("stripe");
 
   const shipping = subtotal > 0 && subtotal < 500 ? 25 : 0;
   const tax = Math.round(subtotal * 0.08);
@@ -76,10 +76,15 @@ function CheckoutPage() {
       .from("orders")
       .insert({
         user_id: user.id,
-        subtotal, shipping_cost: shipping, tax, total_amount: total,
-        payment_method: data.payment_method,
-        payment_status: "pending", status: "pending",
-        shipping_address: address, billing_address: address,
+        subtotal,
+        shipping_cost: shipping,
+        tax,
+        total_amount: total,
+        payment_method: paymentMethod,
+        payment_status: "pending",
+        status: "pending",
+        shipping_address: address,
+        billing_address: address,
       })
       .select("id,order_number")
       .single();
@@ -194,11 +199,16 @@ function CheckoutPage() {
                   { id: "mobile_money", label: "Mobile Money", note: "M-Pesa, MTN, Airtel" },
                   { id: "bank_transfer", label: "Bank Transfer", note: "Wire / ACH" },
                 ].map((m) => (
-                  <label key={m.id} className={`flex items-center gap-4 p-4 border rounded cursor-pointer transition-all ${payment_method === m.id ? "border-black bg-gray-50" : "border-gray-200 hover:border-gray-300"}`}>
+                  <label key={m.id} className={`flex items-center gap-4 p-4 border rounded cursor-pointer transition-all ${paymentMethod === m.id ? "border-black bg-gray-50" : "border-gray-200 hover:border-gray-300"}`}>
                     <input 
                       type="radio" 
                       value={m.id} 
                       {...register("payment_method")}
+                      checked={paymentMethod === m.id}
+                      onChange={() => {
+                        setPaymentMethod(m.id);
+                        setValue("payment_method", m.id);
+                      }}
                       className="h-4 w-4 text-black focus:ring-black border-gray-300" 
                     />
                     <div>

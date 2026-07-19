@@ -40,10 +40,10 @@ export const Route = createFileRoute("/")({
           "Fine diamond jewelry, engagement rings, custom pieces, and luxury watches by Marchello The Jeweler.",
       },
       { property: "og:title", content: "Diamond jewelry by Marchello The Jeweler" },
-      { property: "og:url", content: "/" },
+      { property: "og:url", content: "https://marchellothejeweler.com/" },
     ],
     links: [
-      { rel: "canonical", href: "/" },
+      { rel: "canonical", href: "https://marchellothejeweler.com/" },
       { rel: "preload", as: "image", href: heroJeweler, fetchpriority: "high" } as never,
     ],
   }),

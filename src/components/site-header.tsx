@@ -42,15 +42,6 @@ export function SiteHeader() {
   const closeMenu = useCallback(() => setOpen(false), []);
   const openMenu = useCallback(() => setOpen(true), []);
 
-  useEffect(() => {
-    if (!open) return;
-    const onResize = () => {
-      if (window.matchMedia("(min-width: 768px)").matches) setOpen(false);
-    };
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
-  }, [open]);
-
   return (
     <header className="sticky top-0 z-40 bg-background border-b border-foreground/10">
       <div className="bg-black text-white text-[10px] sm:text-[11px] md:text-xs tracking-wide text-center py-2 px-3 sm:px-4 leading-snug">

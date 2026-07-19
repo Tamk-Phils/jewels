@@ -26,8 +26,8 @@ export function SiteFooter() {
           <div className="text-[10px] tracking-[0.3em] uppercase text-[#e8c547] mb-4">Links</div>
           <ul className="space-y-2 text-sm text-white/70">
             <li><a href="/" className="hover:text-[#e8c547]">Home</a></li>
-            <li><a href="/shop" className="hover:text-[#e8c547]">Store</a></li>
-            <li><a href="/shop" className="hover:text-[#e8c547]">Collections</a></li>
+            <li><a href="/shop" className="hover:text-[#e8c547]">Shop All Jewelry</a></li>
+            <li><a href="/category/rings" className="hover:text-[#e8c547]">Ring Collections</a></li>
             <li><a href="/contact" className="hover:text-[#e8c547]">Custom Orders</a></li>
           </ul>
         </div>
@@ -42,9 +42,9 @@ export function SiteFooter() {
         <div>
           <div className="text-[10px] tracking-[0.3em] uppercase text-[#e8c547] mb-4">Shop</div>
           <ul className="space-y-2 text-sm text-white/70">
-            <li><a href="/shop" className="hover:text-[#e8c547]">All Items</a></li>
-            <li><a href="/shop" className="hover:text-[#e8c547]">Specials</a></li>
-            <li><a href="/shop" className="hover:text-[#e8c547]">Under $1500</a></li>
+            <li><a href="/shop" className="hover:text-[#e8c547]">All Jewelry</a></li>
+            <li><a href="/shop?filter=specials" className="hover:text-[#e8c547]">Specials &amp; Sales</a></li>
+            <li><a href="/shop?filter=under1500" className="hover:text-[#e8c547]">Diamonds Under $1,500</a></li>
           </ul>
           <ul className="space-y-3 text-sm text-white/70 mt-6">
             <li className="flex gap-2 items-start">

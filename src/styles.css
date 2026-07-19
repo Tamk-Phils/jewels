@@ -6,6 +6,12 @@
 @import "@fontsource/playfair-display/700.css";
 @import "@fontsource-variable/inter";
 
+/* Ensure self-hosted fonts never block first paint */
+@font-face { font-family: "Playfair Display"; font-display: swap; src: local("Playfair Display"); }
+@font-face { font-family: "Inter Variable"; font-display: swap; src: local("Inter"); }
+@font-face { font-family: "Inter"; font-display: swap; src: local("Inter"); }
+
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {

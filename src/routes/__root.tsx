@@ -71,8 +71,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     ],
     links: [
       { rel: "stylesheet", href: appCss },
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "dns-prefetch", href: "https://fonts.gstatic.com" },
     ],
     scripts: [
       {
@@ -83,7 +81,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           name: "Marchello The Jeweler",
           alternateName: "Marchello",
           description: "Luxury fine jewelry house crafting 18k gold and ethically sourced diamond pieces.",
-          url: "/",
+          url: "https://marchellothejeweler.com",
           logo: "/favicon.ico",
           foundingDate: "1991",
           sameAs: [
@@ -104,7 +102,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "@context": "https://schema.org",
           "@type": "WebSite",
           name: "Marchello",
-          url: "/",
+          url: "https://marchellothejeweler.com",
           potentialAction: {
             "@type": "SearchAction",
             target: { "@type": "EntryPoint", urlTemplate: "/shop?q={search_term_string}" },

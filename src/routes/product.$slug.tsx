@@ -37,7 +37,7 @@ export const Route = createFileRoute("/product/$slug")({
       { name: "description", content: desc },
       { property: "og:title", content: title },
       { property: "og:description", content: desc },
-      { property: "og:url", content: `/product/${params.slug}` },
+      { property: "og:url", content: `https://marchellothejeweler.com/product/${params.slug}` },
       { property: "og:type", content: "product" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: title },
@@ -101,7 +101,7 @@ export const Route = createFileRoute("/product/$slug")({
 
     return {
       meta,
-      links: [{ rel: "canonical", href: `/product/${params.slug}` }],
+      links: [{ rel: "canonical", href: `https://marchellothejeweler.com/product/${params.slug}` }],
       scripts,
     };
   },
@@ -322,7 +322,14 @@ function MediaGallery({
               {cur.type === "video" ? (
                 <video src={cur.url} controls playsInline poster={cur.poster ?? undefined} className="h-full w-full object-cover" />
               ) : (
-                <img src={cur.url} alt={`${product.name} - Image ${i + 1}`} className="h-full w-full object-cover" decoding="async" />
+                <img
+                  src={cur.url}
+                  alt={`${product.name} - view ${i + 1}`}
+                  className="h-full w-full object-cover"
+                  decoding="async"
+                  loading={i === 0 ? "eager" : "lazy"}
+                  fetchPriority={i === 0 ? "high" : "auto"}
+                />
               )}
             </div>
           ))}
@@ -342,7 +349,7 @@ function MediaGallery({
                   <Play className="absolute inset-0 m-auto h-5 w-5 text-white drop-shadow" />
                 </>
               ) : (
-                <img src={m.url} alt="" className="h-full w-full object-cover" decoding="async" />
+                <img src={m.url} alt={`${product.name} thumbnail ${i + 1}`} className="h-full w-full object-cover" decoding="async" loading="lazy" />
               )}
             </button>
           ))}

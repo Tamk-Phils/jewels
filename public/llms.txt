@@ -1,0 +1,34 @@
+# Marchello The Jeweler — LLMs.txt
+
+> Marchello is a luxury fine jewelry retailer specialising in hand-crafted 18k gold and natural earth-mined diamond pieces. Established 1991. Based at 22 West 47th Street, New York, NY 10036.
+
+## About this site
+
+- **Name**: Marchello The Jeweler
+- **URL**: https://marchellothejeweler.com
+- **Category**: Luxury e-commerce / Fine Jewelry
+
+## Key pages
+
+- Home: https://marchellothejeweler.com/
+- Shop all: https://marchellothejeweler.com/shop
+- Rings: https://marchellothejeweler.com/category/rings
+- Chains: https://marchellothejeweler.com/category/chains
+- Watches: https://marchellothejeweler.com/category/watches
+- Bracelets: https://marchellothejeweler.com/category/bracelets
+- Earrings: https://marchellothejeweler.com/category/earrings
+- Pendants: https://marchellothejeweler.com/category/pendants
+- About: https://marchellothejeweler.com/about
+- Contact: https://marchellothejeweler.com/contact
+- FAQ: https://marchellothejeweler.com/faq
+
+## Contact
+
+- Phone / WhatsApp: +1 (929) 689-1990
+- Email: info@marchellothejeweler.com
+
+## Notes for AI agents
+
+- All product pages include structured data (Schema.org Product + BreadcrumbList)
+- Shopping cart is client-side (localStorage); no server-side session required to browse
+- Custom order requests should be directed to the /contact page
