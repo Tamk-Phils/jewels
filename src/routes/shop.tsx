@@ -53,38 +53,51 @@ export function Shop({ categorySlug }: { categorySlug?: string } = {}) {
     },
   });
 
-  const { data: products = [], isLoading } = useQuery({
-    queryKey: ["products"],
+  const { data: productsData, isLoading } = useQuery({
+    queryKey: ["products", page, cat, material, gender, inStock, priceMax, sort],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from("products")
-        .select("id,name,slug,price,sale_price,stock,material,gold_type,gender,is_new,is_bestseller,images,created_at,category:categories(slug,name)")
+        .select(
+          "id,name,slug,price,sale_price,stock,material,gold_type,gender,is_new,is_bestseller,images,created_at,category:categories(slug,name)",
+          { count: "exact" },
+        )
         .eq("is_published", true);
+
+      if (cat !== "all") query = query.filter("category.slug", "eq", cat);
+      if (material !== "all") query = query.filter("material", "eq", material);
+      if (gender !== "all") query = query.filter("gender", "eq", gender);
+      if (inStock) query = query.filter("stock", "gt", 0);
+      query = query.filter("price", "lte", priceMax);
+
+      if (sort === "new") query = query.order("created_at", { ascending: false });
+      if (sort === "best") query = query.order("is_bestseller", { ascending: false });
+      if (sort === "asc") query = query.order("price", { ascending: true });
+      if (sort === "desc") query = query.order("price", { ascending: false });
+
+      const from = (page - 1) * PAGE_SIZE;
+      const to = from + PAGE_SIZE - 1;
+
+      const { data, error, count } = await query.range(from, to);
+
       if (error) throw error;
-      return (data ?? []) as unknown as (ProductCardProduct & {
-        stock: number; material: string | null; gender: string | null;
-        is_bestseller?: boolean; created_at: string;
-      })[];
+
+      return {
+        products: (data ?? []) as unknown as (ProductCardProduct & {
+          stock: number; material: string | null; gender: string | null;
+          is_bestseller?: boolean; created_at: string;
+        })[],
+        count: count ?? 0,
+      };
     },
   });
 
-  const filtered = useMemo(() => {
-    let list = products.slice();
-    if (cat !== "all") list = list.filter((p) => p.category?.slug === cat);
-    if (material !== "all") list = list.filter((p) => p.material === material);
-    if (gender !== "all") list = list.filter((p) => p.gender === gender);
-    if (inStock) list = list.filter((p) => p.stock > 0);
-    list = list.filter((p) => Number(p.price) <= priceMax);
-    if (sort === "new") list.sort((a, b) => +new Date(b.created_at) - +new Date(a.created_at));
-    if (sort === "best") list.sort((a, b) => (b.is_bestseller ? 1 : 0) - (a.is_bestseller ? 1 : 0));
-    if (sort === "asc") list.sort((a, b) => Number(a.price) - Number(b.price));
-    if (sort === "desc") list.sort((a, b) => Number(b.price) - Number(a.price));
-    return list;
-  }, [products, cat, material, gender, inStock, priceMax, sort]);
+  const products = productsData?.products ?? [];
+  const totalCount = productsData?.count ?? 0;
 
-  // Reset to page 1 whenever filters change
-  const visibleProducts = filtered.slice(0, page * PAGE_SIZE);
-  const hasMore = visibleProducts.length < filtered.length;
+  const filtered = products;
+
+  const hasMore = products.length < totalCount;
 
   const resetPage = () => setPage(1);
 
@@ -96,7 +109,7 @@ export function Shop({ categorySlug }: { categorySlug?: string } = {}) {
           {categorySlug ? cats.find((c) => c.slug === categorySlug)?.name ?? "Shop" : "Shop All"}
         </h1>
         <p className="mt-3 text-foreground/60 max-w-xl mx-auto">
-          {filtered.length} {filtered.length === 1 ? "piece" : "pieces"} available
+          {totalCount} {totalCount === 1 ? "piece" : "pieces"} available
         </p>
       </div>
 
@@ -178,7 +191,7 @@ export function Shop({ categorySlug }: { categorySlug?: string } = {}) {
           ) : (
             <>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-8">
-                {visibleProducts.map((p) => <ProductCard key={p.id} p={p} />)}
+                {products.map((p) => <ProductCard key={p.id} p={p} />)}
               </div>
               {hasMore && (
                 <div className="text-center mt-12">
@@ -186,7 +199,7 @@ export function Shop({ categorySlug }: { categorySlug?: string } = {}) {
                     onClick={() => setPage((n) => n + 1)}
                     className="btn-ghost-gold"
                   >
-                    Load More ({filtered.length - visibleProducts.length} remaining)
+                    Load More ({totalCount - (page * PAGE_SIZE)} remaining)
                   </button>
                 </div>
               )}

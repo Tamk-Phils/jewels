@@ -26,18 +26,20 @@ import {
   Globe,
   Sparkles,
   Star,
+  Truck,
+  CreditCard,
 } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Marchello The Jeweler — Trusted by Generations, Loved by Thousands" },
+      { title: "Diamond jewelry by Marchello The Jeweler" },
       {
         name: "description",
         content:
-          "35 years of natural earth-mined diamonds and solid gold jewelry. Shop chains, pendants, watches, rings, bracelets and earrings.",
+          "Fine diamond jewelry, engagement rings, custom pieces, and luxury watches by Marchello The Jeweler.",
       },
-      { property: "og:title", content: "Marchello The Jeweler — Trusted by Generations, Loved by Thousands" },
+      { property: "og:title", content: "Diamond jewelry by Marchello The Jeweler" },
       { property: "og:url", content: "/" },
     ],
     links: [
@@ -54,10 +56,12 @@ type HomeProduct = ProductCardProduct & {
 };
 
 const SERVICE_ICONS = [
-  { Icon: Gem, label: "Custom Made Piece" },
-  { Icon: Watch, label: "Fine Luxury Watches" },
-  { Icon: Globe, label: "Worldwide Shipping" },
-  { Icon: Sparkles, label: "Upgrade Your Diamonds" },
+  { Icon: Truck, label: "Express Overnight Delivery" },
+  { Icon: CreditCard, label: "Safe & Secure Checkout" },
+  { Icon: Star, label: "Trusted for 35 Years" },
+  { Icon: Gem, label: "Natural Earth Mined Diamonds" },
+  { Icon: Sparkles, label: "Personal Jewelry Consultant" },
+  { Icon: Globe, label: "Layaway Plan Available" },
 ];
 
 const DISCOVER_COLLECTIONS = [
@@ -107,40 +111,51 @@ function categorySlug(p: HomeProduct) {
 }
 
 function HomePage() {
-  const { data: products = [] } = useQuery({
-    queryKey: ["home-products"],
+  const { data: chains = [] } = useQuery({
+    queryKey: ["home-chains"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("products")
         .select("id,name,slug,price,sale_price,is_new,is_bestseller,is_featured,images,media,category:categories(slug,name)")
         .eq("is_published", true)
+        .filter("category.slug", "eq", "chains")
         .order("created_at", { ascending: false })
-        .limit(50);
+        .limit(8);
       if (error) throw error;
       return (data ?? []) as unknown as HomeProduct[];
     },
   });
 
-  const [productTab, setProductTab] = useState<"popular" | "all" | "bestsellers">("popular");
-  const [watchTab, setWatchTab] = useState<"mens" | "womens" | "diamond">("mens");
+  const { data: ringsUnder1500 = [] } = useQuery({
+    queryKey: ["home-rings-under-1500"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("products")
+        .select("id,name,slug,price,sale_price,is_new,is_bestseller,is_featured,images,media,category:categories(slug,name)")
+        .eq("is_published", true)
+        .filter("category.slug", "eq", "rings")
+        .filter("price", "lte", 1500)
+        .order("created_at", { ascending: false })
+        .limit(8);
+      if (error) throw error;
+      return (data ?? []) as unknown as HomeProduct[];
+    },
+  });
 
-  const tabProducts =
-    productTab === "popular"
-      ? products.filter((p) => p.is_featured).slice(0, 8)
-      : productTab === "bestsellers"
-        ? products.filter((p) => p.is_bestseller).slice(0, 8)
-        : products.slice(0, 8);
-
-  const displayProducts = tabProducts.length > 0 ? tabProducts : products.slice(0, 8);
-
-  const ringsUnder5000 = products
-    .filter((p) => categorySlug(p) === "rings" && effectivePrice(p) < 5000)
-    .slice(0, 5);
-  const ringFeatured = ringsUnder5000[0];
-  const ringGrid = ringsUnder5000.slice(1, 5);
-
-  const watches = products.filter((p) => categorySlug(p) === "watches");
-  const watchProducts = watches.slice(0, 10);
+  const { data: homeWatches = [] } = useQuery({
+    queryKey: ["home-watches"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("products")
+        .select("id,name,slug,price,sale_price,is_new,is_bestseller,is_featured,images,media,category:categories(slug,name)")
+        .eq("is_published", true)
+        .filter("category.slug", "eq", "watches")
+        .order("created_at", { ascending: false })
+        .limit(8);
+      if (error) throw error;
+      return (data ?? []) as unknown as HomeProduct[];
+    },
+  });
 
   return (
     <>
@@ -181,6 +196,58 @@ function HomePage() {
               <div className="text-sm font-medium leading-snug">{label}</div>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* CHAINS SECTION */}
+      <section className="container-luxe py-16 md:py-20">
+        <div className="text-center">
+          <div className="eyebrow">New Arrivals</div>
+          <h2 className="font-display text-3xl md:text-4xl mt-3">Chains</h2>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 mt-10 md:mt-14">
+          {chains.map((p) => (
+            <ProductCard key={p.id} p={p} />
+          ))}
+        </div>
+        <div className="text-center mt-12">
+          <Link to="/category/chains" className="btn-gold inline-flex">
+            View all chains <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+      </section>
+
+      {/* DIAMOND ELEGANCE UNDER $1500 SECTION */}
+      <section className="bg-[#f3ece0] py-16 md:py-20">
+        <div className="container-luxe text-center max-w-2xl mx-auto">
+          <h2 className="font-display text-3xl md:text-4xl">Diamond Elegance Under $1500</h2>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 mt-10 md:mt-14">
+          {ringsUnder1500.map((p) => (
+            <ProductCard key={p.id} p={p} />
+          ))}
+        </div>
+        <div className="text-center mt-12">
+          <Link to="/category/rings" className="btn-gold inline-flex">
+            View all under $1500 <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+      </section>
+
+      {/* LUXURY WATCHES SECTION */}
+      <section className="container-luxe py-16 md:py-20">
+        <div className="text-center">
+          <h2 className="font-display text-3xl md:text-4xl mt-3">Luxury Watches</h2>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 mt-10 md:mt-14">
+          {homeWatches.map((p) => (
+            <ProductCard key={p.id} p={p} />
+          ))}
+        </div>
+        <div className="text-center mt-12">
+          <Link to="/category/watches" className="btn-gold inline-flex">
+            View all watches <ArrowRight className="h-4 w-4" />
+          </Link>
         </div>
       </section>
 

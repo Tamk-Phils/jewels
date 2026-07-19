@@ -1,7 +1,8 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import useEmblaCarousel from "embla-carousel-react";
 import { Heart, Share2, Truck, ShieldCheck, ChevronDown, Play } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { formatPrice } from "@/lib/format";
@@ -298,23 +299,41 @@ function MediaGallery({
     ? media
     : [{ url: fallback, path: "fallback", type: "image" }];
   const [active, setActive] = useState(0);
-  const cur = items[active];
+  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true });
+
+  useEffect(() => {
+    if (!emblaApi) return;
+    emblaApi.on("select", () => {
+      setActive(emblaApi.selectedScrollSnap());
+    });
+  }, [emblaApi]);
+
+  const scrollTo = (index: number) => {
+    setActive(index);
+    if (emblaApi) emblaApi.scrollTo(index);
+  };
 
   return (
     <div className="space-y-4">
-      <div className="aspect-square bg-[var(--ink)] overflow-hidden">
-        {cur.type === "video" ? (
-          <video src={cur.url} controls playsInline poster={cur.poster ?? undefined} className="h-full w-full object-cover" />
-        ) : (
-          <img src={cur.url} alt={product.name} className="h-full w-full object-cover" />
-        )}
+      <div className="aspect-square bg-[var(--ink)] overflow-hidden relative" ref={emblaRef}>
+        <div className="flex h-full w-full">
+          {items.map((cur, i) => (
+            <div key={i} className="flex-[0_0_100%] min-w-0 relative h-full w-full">
+              {cur.type === "video" ? (
+                <video src={cur.url} controls playsInline poster={cur.poster ?? undefined} className="h-full w-full object-cover" />
+              ) : (
+                <img src={cur.url} alt={`${product.name} - Image ${i + 1}`} className="h-full w-full object-cover" decoding="async" />
+              )}
+            </div>
+          ))}
+        </div>
       </div>
       {items.length > 1 && (
         <div className="grid grid-cols-5 gap-2">
           {items.slice(0, 10).map((m, i) => (
             <button
               key={i}
-              onClick={() => setActive(i)}
+              onClick={() => scrollTo(i)}
               className={`relative aspect-square bg-[var(--ink)] overflow-hidden border ${i === active ? "border-[var(--gold)]" : "border-transparent"}`}
             >
               {m.type === "video" ? (
@@ -323,7 +342,7 @@ function MediaGallery({
                   <Play className="absolute inset-0 m-auto h-5 w-5 text-white drop-shadow" />
                 </>
               ) : (
-                <img src={m.url} alt="" className="h-full w-full object-cover" />
+                <img src={m.url} alt="" className="h-full w-full object-cover" decoding="async" />
               )}
             </button>
           ))}
