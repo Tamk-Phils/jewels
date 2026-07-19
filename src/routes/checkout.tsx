@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState, memo } from "react";
+import { useState, useRef, memo } from "react";
 import { toast } from "sonner";
 import { useCart } from "@/lib/cart";
 import { useAuth } from "@/lib/auth";
@@ -11,20 +11,7 @@ export const Route = createFileRoute("/checkout")({
   component: CheckoutPage,
 });
 
-type CheckoutFormData = {
-  full_name: string;
-  email: string;
-  phone: string;
-  line1: string;
-  line2: string;
-  city: string;
-  state: string;
-  postal_code: string;
-  country: string;
-  payment_method: string;
-};
-
-/* ─── parent: only reads cart + auth, never re-renders from form state ─── */
+/* ─── parent: reads context; never re-renders from form input ─── */
 function CheckoutPage() {
   const { items, subtotal, clear, isLoaded } = useCart();
   const { user } = useAuth();
@@ -46,13 +33,24 @@ function CheckoutPage() {
     );
   }
 
-  const handleOrder = async (data: CheckoutFormData) => {
+  const handleOrder = async (fd: FormData): Promise<boolean> => {
     if (!user) {
       toast.error("Please sign in to place an order");
       nav({ to: "/auth", search: { redirect: "/checkout" } as never });
       return false;
     }
-    const address = { ...data };
+    const get = (k: string) => (fd.get(k) as string) ?? "";
+    const address = {
+      full_name: get("full_name"),
+      email: get("email"),
+      phone: get("phone"),
+      line1: get("line1"),
+      line2: get("line2"),
+      city: get("city"),
+      state: get("state"),
+      postal_code: get("postal_code"),
+      country: get("country"),
+    };
     const { data: order, error } = await supabase
       .from("orders")
       .insert({
@@ -61,7 +59,7 @@ function CheckoutPage() {
         shipping_cost: shipping,
         tax,
         total_amount: total,
-        payment_method: data.payment_method,
+        payment_method: get("payment_method") || "stripe",
         payment_status: "pending",
         status: "pending",
         shipping_address: address,
@@ -70,20 +68,16 @@ function CheckoutPage() {
       .select("id,order_number")
       .single();
 
-    if (error || !order) {
-      toast.error("Could not place order");
-      return false;
-    }
+    if (error || !order) { toast.error("Could not place order"); return false; }
 
-    // fire-and-forget email notification
     fetch("/.netlify/functions/order-confirmation", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         payload: {
           order_number: order.order_number,
-          customer_email: data.email,
-          customer_name: data.full_name,
+          customer_email: address.email,
+          customer_name: address.full_name,
           subtotal,
           total,
         }
@@ -99,10 +93,18 @@ function CheckoutPage() {
     <div className="container-luxe py-12 md:py-20 max-w-5xl">
       <h1 className="font-display text-4xl md:text-5xl text-center mb-8">Checkout</h1>
 
-      <StepIndicator step={step} />
+      <div className="flex justify-center mb-12 gap-4 md:gap-10 text-[10px] md:text-xs uppercase tracking-[0.25em]">
+        {["Shipping", "Billing", "Payment", "Confirm"].map((s, i) => (
+          <div key={s} className={`flex items-center gap-2 ${step >= (i + 1) ? "text-gold font-medium" : "text-foreground/40"}`}>
+            <span className={`h-6 w-6 rounded-full border flex items-center justify-center ${step >= (i + 1) ? "border-[var(--gold)] bg-[var(--gold)]/10" : "border-foreground/20"}`}>{i + 1}</span>
+            <span className="hidden md:inline">{s}</span>
+          </div>
+        ))}
+      </div>
 
       <div className="grid lg:grid-cols-[1fr_380px] gap-10 items-start">
-        <CheckoutForm
+        {/* Uncontrolled form — zero React re-renders on keystroke */}
+        <UncontrolledCheckoutForm
           step={step}
           setStep={setStep}
           userEmail={user?.email ?? ""}
@@ -110,35 +112,15 @@ function CheckoutPage() {
         />
 
         {step !== 4 && (
-          <OrderSummary
-            items={items}
-            subtotal={subtotal}
-            shipping={shipping}
-            tax={tax}
-            total={total}
-          />
+          <OrderSummary items={items} subtotal={subtotal} shipping={shipping} tax={tax} total={total} />
         )}
       </div>
     </div>
   );
 }
 
-/* ─── Step indicator – pure, no state ─── */
-const StepIndicator = memo(function StepIndicator({ step }: { step: number }) {
-  return (
-    <div className="flex justify-center mb-12 gap-4 md:gap-10 text-[10px] md:text-xs uppercase tracking-[0.25em]">
-      {["Shipping", "Billing", "Payment", "Confirm"].map((s, i) => (
-        <div key={s} className={`flex items-center gap-2 ${step >= (i + 1) ? "text-gold font-medium" : "text-foreground/40"}`}>
-          <span className={`h-6 w-6 rounded-full border flex items-center justify-center ${step >= (i + 1) ? "border-[var(--gold)] bg-[var(--gold)]/10" : "border-foreground/20"}`}>{i + 1}</span>
-          <span className="hidden md:inline">{s}</span>
-        </div>
-      ))}
-    </div>
-  );
-});
-
-/* ─── ISOLATED form component — keystrokes ONLY re-render this ─── */
-function CheckoutForm({
+/* ─── UNCONTROLLED FORM — browser handles input natively, React is never involved ─── */
+function UncontrolledCheckoutForm({
   step,
   setStep,
   userEmail,
@@ -147,34 +129,23 @@ function CheckoutForm({
   step: 1 | 2 | 3 | 4;
   setStep: (s: 1 | 2 | 3 | 4) => void;
   userEmail: string;
-  onSubmitOrder: (data: CheckoutFormData) => Promise<boolean>;
+  onSubmitOrder: (fd: FormData) => Promise<boolean>;
 }) {
+  const formRef = useRef<HTMLFormElement>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [form, setForm] = useState<CheckoutFormData>({
-    full_name: "",
-    email: userEmail,
-    phone: "",
-    line1: "",
-    line2: "",
-    city: "",
-    state: "",
-    postal_code: "",
-    country: "United States",
-    payment_method: "stripe",
-  });
-
-  const set = (e: React.ChangeEvent<HTMLInputElement>) =>
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formRef.current) return;
+    const fd = new FormData(formRef.current);
     setSubmitting(true);
-    const ok = await onSubmitOrder(form);
+    const ok = await onSubmitOrder(fd);
     setSubmitting(false);
     if (ok) setStep(4);
   };
 
   const INPUT = "w-full bg-white text-black border border-gray-300 rounded px-4 py-2.5 focus:border-black focus:outline-none";
+  const LABEL = "block text-[11px] uppercase tracking-wider text-gray-500 mb-1.5 font-medium";
 
   if (step === 4) {
     return (
@@ -184,7 +155,7 @@ function CheckoutForm({
         <p className="text-gray-600 mb-8 max-w-md mx-auto">
           We've received your order and are preparing it for shipment. A confirmation has been sent to your email.
         </p>
-        <Link to="/account" className="bg-black text-white hover:bg-black/80 py-3.5 px-8 font-medium tracking-wide transition-colors inline-flex">
+        <Link to="/account" className="bg-black text-white hover:bg-black/80 py-3.5 px-8 font-medium tracking-wide inline-flex">
           View Orders
         </Link>
       </div>
@@ -192,56 +163,59 @@ function CheckoutForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} autoComplete="off" spellCheck="false" className="w-full">
+    <form ref={formRef} onSubmit={handleSubmit} autoComplete="off" className="w-full">
+      {/* Hidden field persists payment method selection across steps */}
+      <input type="hidden" name="payment_method" defaultValue="stripe" />
+
       {step === 1 && (
         <div className="bg-white text-black p-6 md:p-8 rounded-lg shadow-sm border border-gray-200">
           <h2 className="font-display text-2xl mb-6">Shipping Address</h2>
           <div className="space-y-4">
             <label className="block w-full">
-              <span className="block text-[11px] uppercase tracking-wider text-gray-500 mb-1.5 font-medium">Full Name</span>
-              <input type="text" name="full_name" value={form.full_name} onChange={set} className={INPUT} required />
+              <span className={LABEL}>Full Name</span>
+              <input type="text" name="full_name" defaultValue="" className={INPUT} required />
             </label>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <label className="block w-full">
-                <span className="block text-[11px] uppercase tracking-wider text-gray-500 mb-1.5 font-medium">Email</span>
-                <input type="email" name="email" value={form.email} onChange={set} className={INPUT} required />
+                <span className={LABEL}>Email</span>
+                <input type="email" name="email" defaultValue={userEmail} className={INPUT} required />
               </label>
               <label className="block w-full">
-                <span className="block text-[11px] uppercase tracking-wider text-gray-500 mb-1.5 font-medium">Phone</span>
-                <input type="tel" name="phone" value={form.phone} onChange={set} className={INPUT} required />
+                <span className={LABEL}>Phone</span>
+                <input type="tel" name="phone" defaultValue="" className={INPUT} required />
               </label>
             </div>
             <label className="block w-full">
-              <span className="block text-[11px] uppercase tracking-wider text-gray-500 mb-1.5 font-medium">Address</span>
-              <input type="text" name="line1" value={form.line1} onChange={set} className={INPUT} required />
+              <span className={LABEL}>Address</span>
+              <input type="text" name="line1" defaultValue="" className={INPUT} required />
             </label>
             <label className="block w-full">
-              <span className="block text-[11px] uppercase tracking-wider text-gray-500 mb-1.5 font-medium">Apt, suite (optional)</span>
-              <input type="text" name="line2" value={form.line2} onChange={set} className={INPUT} />
+              <span className={LABEL}>Apt, suite (optional)</span>
+              <input type="text" name="line2" defaultValue="" className={INPUT} />
             </label>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <label className="block w-full">
-                <span className="block text-[11px] uppercase tracking-wider text-gray-500 mb-1.5 font-medium">City</span>
-                <input type="text" name="city" value={form.city} onChange={set} className={INPUT} required />
+                <span className={LABEL}>City</span>
+                <input type="text" name="city" defaultValue="" className={INPUT} required />
               </label>
               <label className="block w-full">
-                <span className="block text-[11px] uppercase tracking-wider text-gray-500 mb-1.5 font-medium">State</span>
-                <input type="text" name="state" value={form.state} onChange={set} className={INPUT} required />
+                <span className={LABEL}>State</span>
+                <input type="text" name="state" defaultValue="" className={INPUT} required />
               </label>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <label className="block w-full">
-                <span className="block text-[11px] uppercase tracking-wider text-gray-500 mb-1.5 font-medium">ZIP Code</span>
-                <input type="text" name="postal_code" value={form.postal_code} onChange={set} className={INPUT} required />
+                <span className={LABEL}>ZIP Code</span>
+                <input type="text" name="postal_code" defaultValue="" className={INPUT} required />
               </label>
               <label className="block w-full">
-                <span className="block text-[11px] uppercase tracking-wider text-gray-500 mb-1.5 font-medium">Country</span>
-                <input type="text" name="country" value={form.country} onChange={set} className={INPUT} required />
+                <span className={LABEL}>Country</span>
+                <input type="text" name="country" defaultValue="United States" className={INPUT} required />
               </label>
             </div>
           </div>
           <div className="mt-8">
-            <button type="button" className="w-full bg-black text-white hover:bg-black/80 py-3.5 px-6 font-medium tracking-wide transition-colors" onClick={() => setStep(2)}>
+            <button type="button" className="w-full bg-black text-white hover:bg-black/80 py-3.5 px-6 font-medium tracking-wide" onClick={() => setStep(2)}>
               Continue to Billing
             </button>
           </div>
@@ -251,12 +225,10 @@ function CheckoutForm({
       {step === 2 && (
         <div className="bg-white text-black p-6 md:p-8 rounded-lg shadow-sm border border-gray-200">
           <h2 className="font-display text-2xl mb-6">Billing Address</h2>
-          <p className="text-gray-600 mb-8 border border-gray-100 bg-gray-50 p-4 rounded text-sm">
-            Same as shipping address.
-          </p>
+          <p className="text-gray-600 mb-8 border border-gray-100 bg-gray-50 p-4 rounded text-sm">Same as shipping address.</p>
           <div className="flex flex-col-reverse md:flex-row gap-3 mt-8">
-            <button type="button" className="w-full md:w-auto py-3.5 px-6 border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors font-medium" onClick={() => setStep(1)}>Back</button>
-            <button type="button" className="w-full bg-black text-white hover:bg-black/80 py-3.5 px-6 font-medium tracking-wide transition-colors" onClick={() => setStep(3)}>Continue to Payment</button>
+            <button type="button" className="w-full md:w-auto py-3.5 px-6 border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium" onClick={() => setStep(1)}>Back</button>
+            <button type="button" className="w-full bg-black text-white hover:bg-black/80 py-3.5 px-6 font-medium tracking-wide" onClick={() => setStep(3)}>Continue to Payment</button>
           </div>
         </div>
       )}
@@ -270,16 +242,9 @@ function CheckoutForm({
               { id: "paypal", label: "PayPal", note: "Pay with your PayPal account" },
               { id: "mobile_money", label: "Mobile Money", note: "M-Pesa, MTN, Airtel" },
               { id: "bank_transfer", label: "Bank Transfer", note: "Wire / ACH" },
-            ].map((m) => (
-              <label key={m.id} className={`flex items-center gap-4 p-4 border rounded cursor-pointer transition-all ${form.payment_method === m.id ? "border-black bg-gray-50" : "border-gray-200 hover:border-gray-300"}`}>
-                <input
-                  type="radio"
-                  name="payment_method"
-                  value={m.id}
-                  checked={form.payment_method === m.id}
-                  onChange={set}
-                  className="h-4 w-4 text-black focus:ring-black border-gray-300"
-                />
+            ].map((m, idx) => (
+              <label key={m.id} className="flex items-center gap-4 p-4 border rounded cursor-pointer border-gray-200 hover:border-gray-300">
+                <input type="radio" name="payment_method" value={m.id} defaultChecked={idx === 0} className="h-4 w-4 accent-black" />
                 <div>
                   <div className="font-medium text-gray-900">{m.label}</div>
                   <div className="text-xs text-gray-500 mt-0.5">{m.note}</div>
@@ -291,8 +256,8 @@ function CheckoutForm({
             Live payment processing will be enabled in the next phase. For now, your order is recorded as "pending".
           </div>
           <div className="flex flex-col-reverse md:flex-row gap-3 mt-8">
-            <button type="button" className="w-full md:w-auto py-3.5 px-6 border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors font-medium" onClick={() => setStep(2)}>Back</button>
-            <button type="submit" disabled={submitting} className="w-full bg-black text-white hover:bg-black/80 py-3.5 px-6 font-medium tracking-wide transition-colors disabled:opacity-50">
+            <button type="button" className="w-full md:w-auto py-3.5 px-6 border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium" onClick={() => setStep(2)}>Back</button>
+            <button type="submit" disabled={submitting} className="w-full bg-black text-white hover:bg-black/80 py-3.5 px-6 font-medium tracking-wide disabled:opacity-50">
               {submitting ? "Placing Order..." : "Place Order"}
             </button>
           </div>
@@ -316,7 +281,7 @@ const OrderSummary = memo(function OrderSummary({
         {items.map((i) => (
           <div key={i.id} className="flex gap-4 items-start">
             <div className="h-16 w-16 bg-gray-200 rounded overflow-hidden shrink-0">
-              {i.image ? <img src={i.image} alt={i.name} className="h-full w-full object-cover" /> : null}
+              {i.image ? <img src={i.image} alt={i.name} className="h-full w-full object-cover" loading="lazy" /> : null}
             </div>
             <div className="flex-1">
               <div className="text-sm font-medium leading-snug">{i.name}</div>
