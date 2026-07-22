@@ -53,8 +53,10 @@ export function Shop({ categorySlug }: { categorySlug?: string } = {}) {
     },
   });
 
+  const selectedCategory = cat === "all" ? null : cats.find((c) => c.slug === cat) ?? null;
+
   const { data: productsData, isLoading } = useQuery({
-    queryKey: ["products", page, cat, material, gender, inStock, priceMax, sort],
+    queryKey: ["products", page, selectedCategory?.id ?? cat, material, gender, inStock, priceMax, sort],
     queryFn: async () => {
       let query = supabase
         .from("products")
@@ -64,7 +66,12 @@ export function Shop({ categorySlug }: { categorySlug?: string } = {}) {
         )
         .eq("is_published", true);
 
-      if (cat !== "all") query = query.filter("category.slug", "eq", cat);
+      if (cat !== "all") {
+        if (!selectedCategory) {
+          return { products: [], count: 0 };
+        }
+        query = query.eq("category_id", selectedCategory.id);
+      }
       if (material !== "all") query = query.filter("material", "eq", material);
       if (gender !== "all") query = query.filter("gender", "eq", gender);
       if (inStock) query = query.filter("stock", "gt", 0);

@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Plus, Edit3, Trash2, X } from "lucide-react";
+import { Plus, Edit3, Trash2, X, Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { formatPrice } from "@/lib/format";
@@ -31,6 +31,26 @@ type ProductRow = {
   media?: MediaItem[] | null;
 };
 
+type ProfileRow = {
+  id: string;
+  full_name: string | null;
+  email: string | null;
+  phone: string | null;
+  loyalty_points: number;
+  created_at: string;
+};
+
+type ReviewRow = {
+  id: string;
+  user_id: string;
+  product_id: string;
+  rating: number;
+  title: string | null;
+  review: string | null;
+  is_approved: boolean;
+  created_at: string;
+};
+
 function AdminPage() {
   const { user } = useAuth();
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
@@ -47,6 +67,40 @@ function AdminPage() {
       .maybeSingle()
       .then(({ data }) => setIsAdmin(!!data));
   }, [user]);
+
+  const { data: users = [] } = useQuery({
+    enabled: isAdmin === true,
+    queryKey: ["admin-users"],
+    queryFn: async () => {
+      const [{ data: profiles }, { data: roles }] = await Promise.all([
+        supabase.from("profiles").select("id,full_name,email,phone,loyalty_points,created_at").order("created_at", { ascending: false }),
+        supabase.from("user_roles").select("user_id,role"),
+      ]);
+      const rolesByUser = new Map<string, string[]>();
+      (roles ?? []).forEach((row) => {
+        const current = rolesByUser.get(row.user_id) ?? [];
+        current.push(row.role);
+        rolesByUser.set(row.user_id, current);
+      });
+      return (profiles ?? []).map((profile) => ({
+        ...profile,
+        roles: rolesByUser.get(profile.id) ?? [],
+      })) as Array<ProfileRow & { roles: string[] }>;
+    },
+  });
+
+  const { data: reviews = [] } = useQuery({
+    enabled: isAdmin === true,
+    queryKey: ["admin-reviews"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("reviews")
+        .select("id,user_id,product_id,rating,title,review,is_approved,created_at")
+        .order("created_at", { ascending: false })
+        .limit(100);
+      return (data ?? []) as ReviewRow[];
+    },
+  });
 
   const { data: products = [] } = useQuery({
     enabled: isAdmin === true,
@@ -98,6 +152,14 @@ function AdminPage() {
   }
 
   const totalRevenue = orders.reduce((s, o) => s + Number(o.total_amount), 0);
+  const [reviewForm, setReviewForm] = useState({
+    user_id: "",
+    product_id: "",
+    rating: 5,
+    title: "",
+    review: "",
+    is_approved: true,
+  });
 
   const remove = async (id: string) => {
     if (!confirm("Delete this product? This cannot be undone.")) return;
@@ -127,6 +189,30 @@ function AdminPage() {
         <Stat label="Revenue" v={formatPrice(totalRevenue)} />
         <Stat label="In Stock" v={String(products.filter((p) => p.stock > 0).length)} />
       </div>
+
+      <section className="mb-12">
+        <h2 className="font-display text-2xl mb-4">Users</h2>
+        <div className="bg-white/60 border border-foreground/10 overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="text-left text-[10px] uppercase tracking-[0.2em] text-foreground/50">
+              <tr>{["Name", "Email", "Phone", "Roles", "Points", "Joined"].map((h) => <th key={h} className="p-3">{h}</th>)}</tr>
+            </thead>
+            <tbody>
+              {users.map((u) => (
+                <tr key={u.id} className="border-t border-foreground/10">
+                  <td className="p-3 font-medium">{u.full_name || "Unnamed user"}</td>
+                  <td className="p-3 text-foreground/70">{u.email || "—"}</td>
+                  <td className="p-3 text-foreground/70">{u.phone || "—"}</td>
+                  <td className="p-3 text-foreground/70">{u.roles.join(", ") || "customer"}</td>
+                  <td className="p-3">{u.loyalty_points}</td>
+                  <td className="p-3 text-foreground/60">{new Date(u.created_at).toLocaleDateString()}</td>
+                </tr>
+              ))}
+              {users.length === 0 && <tr><td colSpan={6} className="p-6 text-center text-foreground/50">No users found.</td></tr>}
+            </tbody>
+          </table>
+        </div>
+      </section>
 
       <section className="mb-12">
         <h2 className="font-display text-2xl mb-4">Products</h2>
@@ -164,6 +250,83 @@ function AdminPage() {
                   </tr>
                 );
               })}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section className="mb-12">
+        <h2 className="font-display text-2xl mb-4">Reviews</h2>
+        <div className="bg-white/60 border border-foreground/10 p-5 mb-4">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
+            <select className="bg-transparent border border-foreground/15 rounded px-3 py-2 text-sm focus:border-[var(--gold)] focus:outline-none" value={reviewForm.user_id} onChange={(e) => setReviewForm((f) => ({ ...f, user_id: e.target.value }))}>
+              <option value="">Select user</option>
+              {users.map((u) => <option key={u.id} value={u.id}>{u.full_name || u.email || u.id}</option>)}
+            </select>
+            <select className="bg-transparent border border-foreground/15 rounded px-3 py-2 text-sm focus:border-[var(--gold)] focus:outline-none" value={reviewForm.product_id} onChange={(e) => setReviewForm((f) => ({ ...f, product_id: e.target.value }))}>
+              <option value="">Select product</option>
+              {products.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+            </select>
+            <select className="bg-transparent border border-foreground/15 rounded px-3 py-2 text-sm focus:border-[var(--gold)] focus:outline-none" value={reviewForm.rating} onChange={(e) => setReviewForm((f) => ({ ...f, rating: Number(e.target.value) }))}>
+              {[5, 4, 3, 2, 1].map((n) => <option key={n} value={n}>{n} stars</option>)}
+            </select>
+            <input className="bg-transparent border border-foreground/15 rounded px-3 py-2 text-sm focus:border-[var(--gold)] focus:outline-none md:col-span-2 lg:col-span-3" placeholder="Review title" value={reviewForm.title} onChange={(e) => setReviewForm((f) => ({ ...f, title: e.target.value }))} />
+            <textarea rows={3} className="bg-transparent border border-foreground/15 rounded px-3 py-2 text-sm focus:border-[var(--gold)] focus:outline-none md:col-span-2 lg:col-span-3" placeholder="Review text" value={reviewForm.review} onChange={(e) => setReviewForm((f) => ({ ...f, review: e.target.value }))} />
+            <label className="flex items-center gap-2 text-sm text-foreground/70 md:col-span-2 lg:col-span-3">
+              <input type="checkbox" checked={reviewForm.is_approved} onChange={(e) => setReviewForm((f) => ({ ...f, is_approved: e.target.checked }))} className="accent-[var(--gold)]" />
+              Approved
+            </label>
+          </div>
+          <div className="mt-3 flex justify-end">
+            <button
+              className="btn-gold"
+              onClick={async () => {
+                if (!reviewForm.user_id || !reviewForm.product_id) {
+                  toast.error("User and product are required");
+                  return;
+                }
+                const { error } = await supabase.from("reviews").insert({
+                  user_id: reviewForm.user_id,
+                  product_id: reviewForm.product_id,
+                  rating: reviewForm.rating,
+                  title: reviewForm.title || null,
+                  review: reviewForm.review || null,
+                  is_approved: reviewForm.is_approved,
+                });
+                if (error) return toast.error(error.message);
+                toast.success("Review added");
+                setReviewForm({ user_id: "", product_id: "", rating: 5, title: "", review: "", is_approved: true });
+                qc.invalidateQueries({ queryKey: ["admin-reviews"] });
+              }}
+            >
+              Add review
+            </button>
+          </div>
+        </div>
+        <div className="bg-white/60 border border-foreground/10 overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="text-left text-[10px] uppercase tracking-[0.2em] text-foreground/50">
+              <tr>{["Rating", "Title", "Review", "Status", "Date"].map((h) => <th key={h} className="p-3">{h}</th>)}</tr>
+            </thead>
+            <tbody>
+              {reviews.map((review) => {
+                const product = products.find((p) => p.id === review.product_id);
+                const userRow = users.find((u) => u.id === review.user_id);
+                return (
+                  <tr key={review.id} className="border-t border-foreground/10">
+                    <td className="p-3 whitespace-nowrap">{review.rating} <Star className="inline-block h-3.5 w-3.5 text-gold align-[-2px]" /></td>
+                    <td className="p-3">
+                      <div className="font-medium">{review.title || "Untitled review"}</div>
+                      <div className="text-xs text-foreground/50">{userRow?.full_name || userRow?.email || review.user_id}</div>
+                      <div className="text-xs text-foreground/50">{product?.name || review.product_id}</div>
+                    </td>
+                    <td className="p-3 text-foreground/70 max-w-xl">{review.review || "—"}</td>
+                    <td className="p-3">{review.is_approved ? "Approved" : "Pending"}</td>
+                    <td className="p-3 text-foreground/60">{new Date(review.created_at).toLocaleDateString()}</td>
+                  </tr>
+                );
+              })}
+              {reviews.length === 0 && <tr><td colSpan={5} className="p-6 text-center text-foreground/50">No reviews yet.</td></tr>}
             </tbody>
           </table>
         </div>
