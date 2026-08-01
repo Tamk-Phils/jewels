@@ -1,21 +1,53 @@
 import { Handler } from '@netlify/functions';
 import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
+
+const resendApiKey = process.env.RESEND_API_KEY;
+const resend = resendApiKey ? new Resend(resendApiKey) : null;
 
 const host = process.env.SMTP_HOST || "mail.spacemail.com";
 const port = parseInt(process.env.SMTP_PORT || "465", 10);
 const user = process.env.SMTP_USER || "support@marchell0thejeweler.com";
 const pass = process.env.SMTP_PASS || "Marc1234?";
 const adminEmail = process.env.ADMIN_EMAIL || "support@marchell0thejeweler.com";
+const fromEmail = process.env.FROM_EMAIL || user;
 
-const transporter = nodemailer.createTransport({
-  host,
-  port,
-  secure: port === 465,
-  auth: { user, pass },
-});
+async function sendMailHelper({ to, subject, html, replyTo }: { to: string; subject: string; html: string; replyTo?: string }) {
+  if (resend) {
+    const sender = process.env.RESEND_FROM || `Marchello The Jeweler <onboarding@resend.dev>`;
+    const { data, error } = await resend.emails.send({
+      from: sender,
+      to,
+      subject,
+      html,
+      replyTo: replyTo,
+    });
+    if (error) {
+      console.error("[Resend Error]:", error);
+      throw new Error(`Resend API Error: ${error.message}`);
+    }
+    return data;
+  }
+
+  // Fallback to Nodemailer SMTP
+  const transporter = nodemailer.createTransport({
+    host,
+    port,
+    secure: port === 465,
+    auth: { user, pass },
+    connectionTimeout: 10000,
+  });
+
+  return await transporter.sendMail({
+    from: `"Marchello The Jeweler" <${fromEmail}>`,
+    to,
+    replyTo,
+    subject,
+    html,
+  });
+}
 
 export const handler: Handler = async (event) => {
-  // Support CORS preflight if needed
   if (event.httpMethod === 'OPTIONS') {
     return {
       statusCode: 200,
@@ -37,8 +69,7 @@ export const handler: Handler = async (event) => {
     const { type, payload } = data;
 
     if (type === 'contact') {
-      await transporter.sendMail({
-        from: `"Marchello The Jeweler" <${user}>`,
+      await sendMailHelper({
         to: adminEmail,
         replyTo: payload.email,
         subject: `New Contact Inquiry from ${payload.name}`,
@@ -88,15 +119,14 @@ export const handler: Handler = async (event) => {
         : 'N/A';
 
       // 1. Email to Customer
-      await transporter.sendMail({
-        from: `"Marchello The Jeweler" <${user}>`,
+      await sendMailHelper({
         to: payload.customer_email,
         subject: `Order Confirmation - ${payload.order_number} | Marchello The Jeweler`,
         html: `
           <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #1a1a1a; background-color: #ffffff; border: 1px solid #e5e5e5;">
             <div style="text-align: center; padding-bottom: 20px; border-bottom: 2px solid #e8c547;">
               <h1 style="font-size: 24px; letter-spacing: 2px; margin: 0; color: #1a1a1a;">MARCHELLO<span style="color: #e8c547;">.</span></h1>
-              <p style="font-size: 11px; text-transform: uppercase; letter-spacing: 3px; color: #888; margin-step: 5px;">Fine Jewelry Atelier</p>
+              <p style="font-size: 11px; text-transform: uppercase; letter-spacing: 3px; color: #888; margin-top: 5px;">Fine Jewelry Atelier</p>
             </div>
 
             <div style="padding: 30px 0;">
@@ -146,8 +176,7 @@ export const handler: Handler = async (event) => {
       });
 
       // 2. Email to Admin
-      await transporter.sendMail({
-        from: `"Marchello Store Alert" <${user}>`,
+      await sendMailHelper({
         to: adminEmail,
         subject: `🚨 NEW ORDER: ${payload.order_number} - $${Number(payload.total || 0).toLocaleString()}`,
         html: `
@@ -199,7 +228,11 @@ export const handler: Handler = async (event) => {
     return {
       statusCode: 500,
       headers: { 'Access-Control-Allow-Origin': '*' },
-      body: JSON.stringify({ success: false, error: error?.message || "Failed to send email" }),
+      body: JSON.stringify({
+        success: false,
+        error: error?.message || "Failed to send email",
+        hint: "Spacemail SMTP credentials returned 535 authentication failed. Please update SMTP_PASS in Netlify environment variables or add a RESEND_API_KEY.",
+      }),
     };
   }
 };
