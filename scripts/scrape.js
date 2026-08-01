@@ -42,17 +42,14 @@ async function generateSeed() {
     const slug = escapeSql(p.handle);
     const description = escapeSql(p.body_html || p.title);
     
-    // Attempt to parse price from variants
     let price = 0;
     if (p.variants && p.variants.length > 0) {
       price = parseFloat(p.variants[0].price) || 0;
     }
 
-    // Extract images
     const images = (p.images || []).map(img => img.src);
     const imagesJson = escapeSql(JSON.stringify(images));
 
-    // SEO Data
     const focusKeyphrase = name;
     const seoTitle = escapeSql(`${p.title} | Lumina Luxe Jewels`);
     const plainDescription = p.body_html ? p.body_html.replace(/<[^>]+>/g, '').trim() : p.title;
@@ -62,17 +59,52 @@ async function generateSeed() {
     const lowerType = (p.product_type || '').toLowerCase();
     const lowerTags = tags.toLowerCase();
     const lowerTitle = p.title.toLowerCase();
+    const fullText = `${lowerTitle} ${lowerType} ${lowerTags} ${plainDescription.toLowerCase()}`;
     
+    // Category classification (Note: Check earring BEFORE ring because 'earring' contains 'ring')
     let categoryId = 'NULL';
-    if (lowerType.includes('ring') || lowerTags.includes('ring') || lowerTitle.includes('ring')) categoryId = `'11111111-1111-1111-1111-111111111111'`;
-    else if (lowerType.includes('earring') || lowerTags.includes('earring') || lowerTitle.includes('earring')) categoryId = `'22222222-2222-2222-2222-222222222222'`;
-    else if (lowerType.includes('pendant') || lowerTags.includes('pendant') || lowerTitle.includes('pendant') || lowerType.includes('cross') || lowerTags.includes('cross')) categoryId = `'33333333-3333-3333-3333-333333333333'`;
-    else if (lowerType.includes('chain') || lowerTags.includes('chain') || lowerTitle.includes('chain') || lowerTitle.includes('necklace')) categoryId = `'44444444-4444-4444-4444-444444444444'`;
-    else if (lowerType.includes('watch') || lowerTags.includes('watch') || lowerTitle.includes('rolex') || lowerTitle.includes('audemars')) categoryId = `'55555555-5555-5555-5555-555555555555'`;
-    else if (lowerType.includes('bracelet') || lowerTags.includes('bracelet') || lowerTitle.includes('bracelet')) categoryId = `'66666666-6666-6666-6666-666666666666'`;
+    if (lowerType.includes('earring') || lowerTags.includes('earring') || lowerTitle.includes('earring') || lowerTitle.includes('hoop')) {
+      categoryId = `'22222222-2222-2222-2222-222222222222'`;
+    } else if (lowerType.includes('ring') || lowerTags.includes('ring') || lowerTitle.includes('ring') || lowerTitle.includes('band')) {
+      categoryId = `'11111111-1111-1111-1111-111111111111'`;
+    } else if (lowerType.includes('pendant') || lowerTags.includes('pendant') || lowerTitle.includes('pendant') || lowerType.includes('cross') || lowerTags.includes('cross') || lowerTitle.includes('charm') || lowerTitle.includes('cross')) {
+      categoryId = `'33333333-3333-3333-3333-333333333333'`;
+    } else if (lowerType.includes('chain') || lowerTags.includes('chain') || lowerTitle.includes('chain') || lowerTitle.includes('necklace')) {
+      categoryId = `'44444444-4444-4444-4444-444444444444'`;
+    } else if (lowerType.includes('watch') || lowerTags.includes('watch') || lowerTitle.includes('rolex') || lowerTitle.includes('audemars') || lowerTitle.includes('submariner') || lowerTitle.includes('datejust')) {
+      categoryId = `'55555555-5555-5555-5555-555555555555'`;
+    } else if (lowerType.includes('bracelet') || lowerTags.includes('bracelet') || lowerTitle.includes('bracelet') || lowerTitle.includes('bangle')) {
+      categoryId = `'66666666-6666-6666-6666-666666666666'`;
+    }
 
-    sql += `INSERT INTO public.products (name, slug, description, price, images, is_published, stock, focus_keyphrase, seo_title, seo_meta_description, tags, category_id)\n`;
-    sql += `VALUES ('${name}', '${slug}', '${description}', ${price}, '${imagesJson}'::jsonb, true, 10, '${focusKeyphrase}', '${seoTitle}', '${seoMetaDescription}', '${tags}', ${categoryId})\n`;
+    // Fallback category matching if still NULL
+    if (categoryId === 'NULL') {
+      if (fullText.includes('ring') || fullText.includes('band')) categoryId = `'11111111-1111-1111-1111-111111111111'`;
+      else if (fullText.includes('earring') || fullText.includes('stud')) categoryId = `'22222222-2222-2222-2222-222222222222'`;
+      else if (fullText.includes('pendant') || fullText.includes('charm')) categoryId = `'33333333-3333-3333-3333-333333333333'`;
+      else if (fullText.includes('chain') || fullText.includes('necklace')) categoryId = `'44444444-4444-4444-4444-444444444444'`;
+      else if (fullText.includes('watch') || fullText.includes('rolex')) categoryId = `'55555555-5555-5555-5555-555555555555'`;
+      else if (fullText.includes('bracelet')) categoryId = `'66666666-6666-6666-6666-666666666666'`;
+      else categoryId = `'11111111-1111-1111-1111-111111111111'`; // Default to Rings
+    }
+
+    // Gender classification
+    let gender = 'Unisex';
+    if (fullText.includes('men`s') || fullText.includes('mens') || fullText.includes('men ') || fullText.includes('male') || fullText.includes('rolex') || fullText.includes('submariner') || fullText.includes('cuban link')) {
+      gender = 'Men';
+    } else if (fullText.includes('ladies') || fullText.includes('women') || fullText.includes('engagement') || fullText.includes('heart') || fullText.includes('flower') || fullText.includes('butterfly') || fullText.includes('bridal') || fullText.includes('earring')) {
+      gender = 'Women';
+    }
+
+    // Material classification
+    let material = '14k Gold';
+    if (fullText.includes('18k')) material = '18k Gold';
+    else if (fullText.includes('14k')) material = '14k Gold';
+    else if (fullText.includes('10k')) material = '10k Gold';
+    else if (fullText.includes('platinum')) material = 'Platinum';
+
+    sql += `INSERT INTO public.products (name, slug, description, price, images, is_published, stock, focus_keyphrase, seo_title, seo_meta_description, tags, category_id, gender, material)\n`;
+    sql += `VALUES ('${name}', '${slug}', '${description}', ${price}, '${imagesJson}'::jsonb, true, 10, '${focusKeyphrase}', '${seoTitle}', '${seoMetaDescription}', '${tags}', ${categoryId}, '${gender}', '${material}')\n`;
     sql += `ON CONFLICT (slug) DO UPDATE SET\n`;
     sql += `  name = EXCLUDED.name,\n`;
     sql += `  description = EXCLUDED.description,\n`;
@@ -82,7 +114,9 @@ async function generateSeed() {
     sql += `  seo_title = EXCLUDED.seo_title,\n`;
     sql += `  seo_meta_description = EXCLUDED.seo_meta_description,\n`;
     sql += `  tags = EXCLUDED.tags,\n`;
-    sql += `  category_id = EXCLUDED.category_id;\n\n`;
+    sql += `  category_id = EXCLUDED.category_id,\n`;
+    sql += `  gender = EXCLUDED.gender,\n`;
+    sql += `  material = EXCLUDED.material;\n\n`;
   }
 
   const outPath = path.join(process.cwd(), 'supabase', 'seed.sql');

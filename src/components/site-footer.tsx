@@ -43,8 +43,10 @@ export function SiteFooter() {
           <div className="text-[10px] tracking-[0.3em] uppercase text-[#e8c547] mb-4">Shop</div>
           <ul className="space-y-2 text-sm text-white/70">
             <li><a href="/shop" className="hover:text-[#e8c547]">All Jewelry</a></li>
-            <li><a href="/shop?filter=specials" className="hover:text-[#e8c547]">Specials &amp; Sales</a></li>
-            <li><a href="/shop?filter=under1500" className="hover:text-[#e8c547]">Diamonds Under $1,500</a></li>
+            <li><a href="/category/mens" className="hover:text-[#e8c547]">Men's Collection</a></li>
+            <li><a href="/category/womens" className="hover:text-[#e8c547]">Women's Collection</a></li>
+            <li><a href="/category/specials" className="hover:text-[#e8c547]">Specials &amp; Sales</a></li>
+            <li><a href="/category/under-1500" className="hover:text-[#e8c547]">Diamonds Under $1,500</a></li>
           </ul>
           <ul className="space-y-3 text-sm text-white/70 mt-6">
             <li className="flex gap-2 items-start">

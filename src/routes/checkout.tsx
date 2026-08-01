@@ -147,13 +147,15 @@ function UncontrolledCheckoutForm({
   const INPUT = "w-full bg-white text-black border border-gray-300 rounded px-4 py-2.5 focus:border-black focus:outline-none";
   const LABEL = "block text-[11px] uppercase tracking-wider text-gray-500 mb-1.5 font-medium";
 
+  const [selectedPayment, setSelectedPayment] = useState<string>("card");
+
   if (step === 4) {
     return (
       <div className="bg-white text-black p-10 md:p-16 rounded-lg shadow-sm border border-gray-200 text-center">
         <div className="text-xs uppercase tracking-widest text-gray-500 mb-3">Thank you</div>
         <h2 className="font-display text-4xl mb-4">Order Received</h2>
         <p className="text-gray-600 mb-8 max-w-md mx-auto">
-          We've received your order and are preparing it for shipment. A confirmation has been sent to your email.
+          We've received your order and are preparing it for processing. A confirmation has been sent to your email.
         </p>
         <Link to="/account" className="bg-black text-white hover:bg-black/80 py-3.5 px-8 font-medium tracking-wide inline-flex">
           View Orders
@@ -165,7 +167,7 @@ function UncontrolledCheckoutForm({
   return (
     <form ref={formRef} onSubmit={handleSubmit} autoComplete="off" className="w-full">
       {/* Hidden field persists payment method selection across steps */}
-      <input type="hidden" name="payment_method" defaultValue="stripe" />
+      <input type="hidden" name="payment_method" value={selectedPayment} />
 
       {step === 1 && (
         <div className="bg-white text-black p-6 md:p-8 rounded-lg shadow-sm border border-gray-200">
@@ -235,16 +237,24 @@ function UncontrolledCheckoutForm({
 
       {step === 3 && (
         <div className="bg-white text-black p-6 md:p-8 rounded-lg shadow-sm border border-gray-200">
-          <h2 className="font-display text-2xl mb-6">Payment Method</h2>
-          <div className="space-y-3">
+          <h2 className="font-display text-2xl mb-6">Payment Details</h2>
+          
+          {/* Payment options (Mobile Money completely removed) */}
+          <div className="space-y-3 mb-6">
             {[
-              { id: "stripe", label: "Credit / Debit Card", note: "Secured by Stripe" },
-              { id: "paypal", label: "PayPal", note: "Pay with your PayPal account" },
-              { id: "mobile_money", label: "Mobile Money", note: "M-Pesa, MTN, Airtel" },
-              { id: "bank_transfer", label: "Bank Transfer", note: "Wire / ACH" },
-            ].map((m, idx) => (
-              <label key={m.id} className="flex items-center gap-4 p-4 border rounded cursor-pointer border-gray-200 hover:border-gray-300">
-                <input type="radio" name="payment_method" value={m.id} defaultChecked={idx === 0} className="h-4 w-4 accent-black" />
+              { id: "card", label: "Credit / Debit Card", note: "Visa, Mastercard, American Express, Discover" },
+              { id: "paypal", label: "PayPal", note: "Pay via PayPal account" },
+              { id: "bank_transfer", label: "Bank Wire / ACH Transfer", note: "Direct wire details will be provided" },
+            ].map((m) => (
+              <label key={m.id} className={`flex items-center gap-4 p-4 border rounded cursor-pointer transition-all ${selectedPayment === m.id ? "border-black bg-gray-50/50" : "border-gray-200 hover:border-gray-300"}`}>
+                <input
+                  type="radio"
+                  name="payment_selection"
+                  value={m.id}
+                  checked={selectedPayment === m.id}
+                  onChange={() => setSelectedPayment(m.id)}
+                  className="h-4 w-4 accent-black"
+                />
                 <div>
                   <div className="font-medium text-gray-900">{m.label}</div>
                   <div className="text-xs text-gray-500 mt-0.5">{m.note}</div>
@@ -252,13 +262,59 @@ function UncontrolledCheckoutForm({
               </label>
             ))}
           </div>
-          <div className="mt-6 p-4 bg-yellow-50 text-yellow-800 text-sm rounded border border-yellow-100">
-            Live payment processing will be enabled in the next phase. For now, your order is recorded as "pending".
+
+          {/* Card Information Inputs */}
+          {selectedPayment === "card" && (
+            <div className="p-5 border border-gray-200 rounded bg-gray-50/30 space-y-4 mb-6">
+              <div className="text-xs font-semibold uppercase tracking-wider text-gray-700 mb-2">Enter Card Information</div>
+              <label className="block w-full">
+                <span className={LABEL}>Cardholder Name</span>
+                <input type="text" name="card_name" placeholder="John Doe" className={INPUT} required={selectedPayment === "card"} />
+              </label>
+              <label className="block w-full">
+                <span className={LABEL}>Card Number</span>
+                <input
+                  type="text"
+                  name="card_number"
+                  placeholder="1234 5678 9101 1121"
+                  maxLength={19}
+                  className={INPUT}
+                  required={selectedPayment === "card"}
+                />
+              </label>
+              <div className="grid grid-cols-2 gap-4">
+                <label className="block w-full">
+                  <span className={LABEL}>Expiry Date</span>
+                  <input type="text" name="card_expiry" placeholder="MM / YY" maxLength={5} className={INPUT} required={selectedPayment === "card"} />
+                </label>
+                <label className="block w-full">
+                  <span className={LABEL}>CVV / CVC</span>
+                  <input type="text" name="card_cvc" placeholder="123" maxLength={4} className={INPUT} required={selectedPayment === "card"} />
+                </label>
+              </div>
+            </div>
+          )}
+
+          {selectedPayment === "paypal" && (
+            <div className="p-4 bg-gray-50 text-gray-700 text-sm rounded border border-gray-200 mb-6">
+              You will be redirected or prompted to sign into your PayPal account upon clicking place order.
+            </div>
+          )}
+
+          {selectedPayment === "bank_transfer" && (
+            <div className="p-4 bg-gray-50 text-gray-700 text-sm rounded border border-gray-200 mb-6">
+              Bank transfer details will be sent to your email along with your order invoice.
+            </div>
+          )}
+
+          <div className="p-4 bg-gray-100 text-gray-700 text-xs rounded border border-gray-200 leading-relaxed mb-6">
+            🔒 Your card details are securely collected for order processing. Order will be recorded and processed by our billing department.
           </div>
+
           <div className="flex flex-col-reverse md:flex-row gap-3 mt-8">
             <button type="button" className="w-full md:w-auto py-3.5 px-6 border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium" onClick={() => setStep(2)}>Back</button>
             <button type="submit" disabled={submitting} className="w-full bg-black text-white hover:bg-black/80 py-3.5 px-6 font-medium tracking-wide disabled:opacity-50">
-              {submitting ? "Placing Order..." : "Place Order"}
+              {submitting ? "Processing Order..." : "Place Order"}
             </button>
           </div>
         </div>

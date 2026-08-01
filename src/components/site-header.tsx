@@ -8,32 +8,24 @@ import logoCrest from "@/assets/logo-crest.png";
 type NavItem = { to: string; label: string; children?: { to: string; label: string }[] };
 
 export const NAV: NavItem[] = [
-  { to: "/shop", label: "Specials" },
-  { to: "/shop", label: "Under $1500" },
+  { to: "/category/mens", label: "Men's Collection" },
+  { to: "/category/womens", label: "Women's Collection" },
   {
     to: "/shop",
-    label: "All Items",
+    label: "Categories",
     children: [
-      { to: "/category/earrings", label: "Earrings" },
       { to: "/category/rings", label: "Rings" },
+      { to: "/category/earrings", label: "Earrings" },
       { to: "/category/watches", label: "Watches" },
       { to: "/category/bracelets", label: "Bracelets" },
       { to: "/category/pendants", label: "Pendants" },
       { to: "/category/chains", label: "Chains" },
     ],
   },
-  {
-    to: "/shop",
-    label: "Lab Collection",
-    children: [
-      { to: "/category/rings", label: "Lab Rings" },
-      { to: "/category/bracelets", label: "Lab Bracelets" },
-      { to: "/category/chains", label: "Lab Chains" },
-      { to: "/category/earrings", label: "Lab Earrings" },
-    ],
-  },
+  { to: "/category/specials", label: "Specials" },
+  { to: "/category/under-1500", label: "Under $1500" },
+  { to: "/category/lab-collection", label: "Lab Collection" },
   { to: "/contact", label: "Contact" },
-  { to: "/faq", label: "FAQ" },
 ];
 
 export function SiteHeader() {

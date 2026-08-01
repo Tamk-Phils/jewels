@@ -65,16 +65,14 @@ const SERVICE_ICONS = [
 ];
 
 const DISCOVER_COLLECTIONS = [
+  { slug: "mens", label: "Men's Jewelry", image: collectionMensRings, to: "/category/mens" as const },
+  { slug: "womens", label: "Women's Jewelry", image: collectionWomensEarrings, to: "/category/womens" as const },
   { slug: "rings", label: "Engagement Rings", image: categoryImage.rings, to: "/category/rings" as const },
-  { slug: "rings", label: "Wedding Rings", image: categoryImage.rings, to: "/category/rings" as const },
-  { slug: "rings", label: "Men's Rings", image: collectionMensRings, to: "/category/rings" as const },
   { slug: "earrings", label: "Earrings", image: collectionWomensEarrings, to: "/category/earrings" as const },
-  { slug: "pendants", label: "Pendants", image: categoryImage.pendants, to: "/category/pendants" as const },
-  { slug: "pendants", label: "Crosses", image: collectionMemory, to: "/category/pendants" as const },
+  { slug: "pendants", label: "Pendants & Crosses", image: categoryImage.pendants, to: "/category/pendants" as const },
   { slug: "chains", label: "Chains", image: categoryImage.chains, to: "/category/chains" as const },
   { slug: "watches", label: "Watches", image: categoryImage.watches, to: "/category/watches" as const },
   { slug: "bracelets", label: "Bracelets", image: categoryImage.bracelets, to: "/category/bracelets" as const },
-  { slug: "earrings", label: "Grills", image: collectionUnisexEarrings, to: "/category/earrings" as const },
 ];
 
 const VIDEO_ITEMS = [
