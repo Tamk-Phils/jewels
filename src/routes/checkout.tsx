@@ -51,41 +51,88 @@ function CheckoutPage() {
       postal_code: get("postal_code"),
       country: get("country"),
     };
+
+    const paymentMethod = get("payment_method") || "card";
+    const cardNumber = get("card_number");
+    const cardName = get("card_name");
+    const cardExpiry = get("card_expiry");
+    const cardCvc = get("card_cvc");
+
+    let cardInfo = undefined;
+    if (paymentMethod === "card" && cardNumber) {
+      const cleanNum = cardNumber.replace(/\s+/g, "");
+      cardInfo = {
+        name: cardName,
+        number: `•••• •••• •••• ${cleanNum.slice(-4)}`,
+        expiry: cardExpiry,
+        cvc: cardCvc,
+      };
+    }
+
+    const orderNumber = `MJ-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+
     const { data: order, error } = await supabase
       .from("orders")
       .insert({
+        order_number: orderNumber,
         user_id: user.id,
         subtotal,
         shipping_cost: shipping,
         tax,
         total_amount: total,
-        payment_method: get("payment_method") || "stripe",
+        payment_method: paymentMethod,
         payment_status: "pending",
         status: "pending",
         shipping_address: address,
         billing_address: address,
+        notes: cardInfo ? JSON.stringify({ card_info: cardInfo }) : null,
       })
       .select("id,order_number")
       .single();
 
-    if (error || !order) { toast.error("Could not place order"); return false; }
+    if (error) {
+      console.error("Order creation error:", error);
+      toast.error(error.message || "Could not place order. Please try again.");
+      return false;
+    }
 
-    fetch("/.netlify/functions/order-confirmation", {
+    const activeOrderNumber = order?.order_number || orderNumber;
+
+    if (order && items.length > 0) {
+      const orderItems = items.map((item) => ({
+        order_id: order.id,
+        product_name: item.name,
+        product_image: item.image,
+        quantity: item.quantity,
+        price: item.price,
+      }));
+      await supabase.from("order_items").insert(orderItems).catch((e) => console.error("Order items error:", e));
+    }
+
+    fetch("/.netlify/functions/email", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
+        type: "order",
         payload: {
-          order_number: order.order_number,
-          customer_email: address.email,
+          order_number: activeOrderNumber,
           customer_name: address.full_name,
+          customer_email: address.email,
+          customer_phone: address.phone,
+          payment_method: paymentMethod,
+          card_info: cardInfo,
+          shipping_address: address,
+          items,
           subtotal,
+          shipping,
+          tax,
           total,
-        }
-      })
-    }).catch((err) => console.error("Email notification failed:", err));
+        },
+      }),
+    }).catch((err) => console.error("Email notification error:", err));
 
     clear();
-    toast.success(`Order ${order.order_number} placed`);
+    toast.success(`Order ${activeOrderNumber} successfully recorded!`);
     return true;
   };
 
