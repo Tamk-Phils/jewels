@@ -63,11 +63,18 @@ function netlifyFunctionsDevPlugin(): Plugin {
                 };
 
                 if (type === "contact") {
+                  // 1. Admin Alert
                   await sendMailHelper({
                     to: adminEmail,
                     replyTo: payload.email,
                     subject: `New Contact Inquiry from ${payload.name}`,
                     html: `<div style="font-family:sans-serif;"><h2 style="color:#b8912d;">New Contact Inquiry</h2><p><strong>Name:</strong> ${payload.name}</p><p><strong>Email:</strong> ${payload.email}</p><p><strong>Message:</strong> ${payload.message}</p></div>`,
+                  });
+                  // 2. Customer Auto-Reply
+                  await sendMailHelper({
+                    to: payload.email,
+                    subject: `We've received your message — Marchello The Jeweler`,
+                    html: `<div style="font-family:sans-serif;"><h2>Hello ${payload.name},</h2><p>Thank you for reaching out to <strong>Marchello The Jeweler</strong>. We have received your inquiry and our personal shopping support team will get back to you momentarily.</p></div>`,
                   });
                 } else if (type === "order") {
                   await sendMailHelper({

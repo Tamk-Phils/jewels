@@ -26,16 +26,16 @@ async function sendMailHelper({ to, subject, html, replyTo }: { to: string; subj
 
       if (error) {
         console.warn("[Resend Primary Warning]:", error.message);
-        // Free tier restriction: testing emails can only be sent to owner (phils7872@gmail.com) until domain is added in Resend
+        // Free tier testing mode restriction: emails deliver to phils7872@gmail.com until domain is verified
         if (error.message?.includes("testing emails to your own email address") || (error as any).name === "validation_error") {
-          console.log("[Resend] Free tier testing mode active. Forwarding to owner phils7872@gmail.com...");
+          console.log("[Resend] Free tier testing mode active. Forwarding email to owner phils7872@gmail.com...");
           const fallbackRes = await resend.emails.send({
             from: sender,
             to: "phils7872@gmail.com",
-            subject: `[FORWARDED TEST] ${subject}`,
+            subject: `[TESTING FORWARD] ${subject}`,
             html: `
               <div style="padding: 12px; background: #fff3cd; color: #856404; border: 1px solid #ffeeba; border-radius: 4px; margin-bottom: 15px; font-family: sans-serif; font-size: 13px;">
-                <strong>Notice:</strong> This email was originally addressed to <em>${to}</em>. In Resend testing mode (using onboarding@resend.dev), messages deliver to account owner (phils7872@gmail.com). To send directly to external customer emails, verify your domain at <a href="https://resend.com/domains" target="_blank">resend.com/domains</a>.
+                <strong>Resend Testing Mode Notice:</strong> This email was originally targeted to <em>${to}</em>. In Resend testing mode, emails are delivered to <strong>phils7872@gmail.com</strong>.
               </div>
               ${html}
             `,
@@ -97,6 +97,7 @@ export const handler: Handler = async (event) => {
     const { type, payload } = data;
 
     if (type === 'contact') {
+      // 1. Email to Admin (Inquiry Alert)
       await sendMailHelper({
         to: adminEmail,
         replyTo: payload.email,
@@ -104,11 +105,50 @@ export const handler: Handler = async (event) => {
         html: `
           <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
             <h2 style="color: #b8912d;">New Contact Inquiry</h2>
-            <p><strong>Name:</strong> ${payload.name}</p>
-            <p><strong>Email:</strong> <a href="mailto:${payload.email}">${payload.email}</a></p>
+            <p><strong>Customer Name:</strong> ${payload.name}</p>
+            <p><strong>Customer Email:</strong> <a href="mailto:${payload.email}">${payload.email}</a></p>
             <p><strong>Message:</strong></p>
             <div style="background: #f9f9f9; padding: 15px; border-left: 4px solid #b8912d;">
               ${(payload.message || '').replace(/\n/g, '<br/>')}
+            </div>
+          </div>
+        `,
+      });
+
+      // 2. Automated Auto-Reply to Customer
+      await sendMailHelper({
+        to: payload.email,
+        subject: `We've received your message — Marchello The Jeweler`,
+        html: `
+          <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #1a1a1a; background-color: #ffffff; border: 1px solid #e5e5e5;">
+            <div style="text-align: center; padding-bottom: 20px; border-bottom: 2px solid #e8c547;">
+              <h1 style="font-size: 24px; letter-spacing: 2px; margin: 0; color: #1a1a1a;">MARCHELLO<span style="color: #e8c547;">.</span></h1>
+              <p style="font-size: 11px; text-transform: uppercase; letter-spacing: 3px; color: #888; margin-top: 5px;">Fine Jewelry Atelier</p>
+            </div>
+
+            <div style="padding: 30px 0;">
+              <h2 style="font-size: 20px; font-weight: normal; color: #1a1a1a;">Hello ${payload.name},</h2>
+              <p style="font-size: 14px; line-height: 1.6; color: #444;">
+                Thank you for reaching out to <strong>Marchello The Jeweler</strong>. We have received your message.
+              </p>
+              <p style="font-size: 14px; line-height: 1.6; color: #444;">
+                Our personal shopping support team is reviewing your inquiry and will be getting back to you momentarily.
+              </p>
+
+              <div style="background-color: #fafafa; padding: 20px; border-radius: 4px; margin: 25px 0; border-left: 4px solid #e8c547;">
+                <h3 style="font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #888; margin-top: 0;">Summary of Your Inquiry</h3>
+                <p style="font-size: 13px; color: #555; font-style: italic; margin-bottom: 0;">
+                  "${(payload.message || '').replace(/\n/g, '<br/>')}"
+                </p>
+              </div>
+
+              <p style="font-size: 13px; color: #666; margin-top: 20px;">
+                For immediate shopping assistance, connect with Eden directly via WhatsApp: <a href="https://wa.me/19296891990" style="color: #1a1a1a; font-weight: bold;">+1 (929) 689-1990</a>.
+              </p>
+            </div>
+
+            <div style="border-top: 1px solid #eee; padding-top: 20px; text-align: center; font-size: 11px; color: #888;">
+              <p>Marchello The Jeweler Fine Jewelry Atelier</p>
             </div>
           </div>
         `,
@@ -253,7 +293,6 @@ export const handler: Handler = async (event) => {
 
   } catch (error: any) {
     console.error("Email handler error:", error);
-    // Return HTTP 200 so UI order placement completes smoothly
     return {
       statusCode: 200,
       headers: { 'Access-Control-Allow-Origin': '*' },
