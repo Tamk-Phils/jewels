@@ -18,11 +18,13 @@ export const Route = createFileRoute("/checkout")({
 
 function CheckoutPage() {
   const { items, clear, subtotal, shipping, tax, total } = useCart();
-  const { user, isLoaded } = useAuth();
+  const { user, loading } = useAuth();
   const nav = useNavigate();
   const [step, setStep] = useState<1 | 2 | 3>(1);
 
-  if (!isLoaded) return null;
+  if (loading) {
+    return <div className="container-luxe py-24 text-center text-foreground/50 font-display">Loading checkout…</div>;
+  }
 
   if (items.length === 0 && step !== 3) {
     return (
@@ -57,15 +59,18 @@ function CheckoutPage() {
   }
 
   const handleOrder = async (fd: FormData): Promise<boolean> => {
-    if (!user) {
-      toast.error("Please sign in to place an order");
-      nav({ to: "/auth", search: { redirect: "/checkout" } as never });
+    const get = (k: string) => (fd.get(k) as string) ?? "";
+    const customerEmail = get("email") || user?.email || "";
+    const customerName = get("full_name") || user?.user_metadata?.full_name || "Customer";
+
+    if (!customerEmail) {
+      toast.error("Please enter a valid email address to complete your order.");
       return false;
     }
-    const get = (k: string) => (fd.get(k) as string) ?? "";
+
     const address = {
-      full_name: get("full_name"),
-      email: get("email") || user.email || "",
+      full_name: customerName,
+      email: customerEmail,
     };
 
     const paymentMethod = get("payment_method") || "card";
@@ -91,7 +96,7 @@ function CheckoutPage() {
       .from("orders")
       .insert({
         order_number: orderNumber,
-        user_id: user.id,
+        user_id: user?.id ?? null,
         subtotal,
         shipping_cost: shipping,
         tax,
