@@ -139,7 +139,7 @@ export const handler: Handler = async (event) => {
             </div>
 
             <div style="border-top: 1px solid #eee; padding-top: 20px; text-align: center; font-size: 11px; color: #888;">
-              <p>Marchello The Jeweler — 22 West 47th Street, New York, NY 10036</p>
+              <p>Marchello The Jeweler Fine Jewelry</p>
             </div>
           </div>
         `,

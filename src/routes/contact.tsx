@@ -72,7 +72,13 @@ function ContactPage() {
           </li>
           <li className="flex gap-3">
             <Mail className="h-4 w-4 text-gold mt-0.5" />
-            <a href="https://wa.me/19296891990" className="hover:text-gold">Chat on WhatsApp</a>
+            <span>
+              Email: <a href="mailto:support@marchell0thejeweler.com" className="hover:text-gold font-medium">support@marchell0thejeweler.com</a>
+            </span>
+          </li>
+          <li className="flex gap-3">
+            <Mail className="h-4 w-4 text-gold mt-0.5" />
+            <a href="https://wa.me/19296891990" className="hover:text-gold font-medium">Chat on WhatsApp</a>
           </li>
         </ul>
       </div>

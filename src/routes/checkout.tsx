@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState, useRef, memo } from "react";
+import { memo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useCart } from "@/lib/cart";
 import { useAuth } from "@/lib/auth";
@@ -7,24 +7,24 @@ import { formatPrice } from "@/lib/format";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/checkout")({
-  head: () => ({ meta: [{ title: "Checkout — Marchello" }] }),
+  head: () => ({
+    meta: [
+      { title: "Checkout — Marchello The Jeweler" },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+  }),
   component: CheckoutPage,
 });
 
-/* ─── parent: reads context; never re-renders from form input ─── */
 function CheckoutPage() {
-  const { items, subtotal, clear, isLoaded } = useCart();
-  const { user } = useAuth();
+  const { items, clear, subtotal, shipping, tax, total } = useCart();
+  const { user, isLoaded } = useAuth();
   const nav = useNavigate();
-  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
-
-  const shipping = subtotal > 0 && subtotal < 500 ? 25 : 0;
-  const tax = Math.round(subtotal * 0.08);
-  const total = subtotal + shipping + tax;
+  const [step, setStep] = useState<1 | 2 | 3>(1);
 
   if (!isLoaded) return null;
 
-  if (items.length === 0 && step !== 4) {
+  if (items.length === 0 && step !== 3) {
     return (
       <div className="container-luxe py-20 md:py-28 max-w-2xl text-center">
         <div className="bg-white text-black p-8 md:p-12 rounded-lg shadow-sm border border-gray-200">
@@ -39,9 +39,8 @@ function CheckoutPage() {
               To verify payment details, check order status, or send inquiry details directly to our admin team:
             </p>
             <ul className="text-xs text-gray-700 space-y-1.5 pt-1 font-medium">
-              <li>✉️ Email Admin: <a href="mailto:info@marchellothejeweler.com" className="text-black underline font-semibold">info@marchellothejeweler.com</a></li>
+              <li>✉️ Email Support: <a href="mailto:support@marchell0thejeweler.com" className="text-black underline font-semibold">support@marchell0thejeweler.com</a></li>
               <li>💬 WhatsApp Support: <a href="https://wa.me/19296891990" className="text-black underline font-semibold">+1 (929) 689-1990</a></li>
-              <li>📍 Store Atelier: 22 West 47th Street, New York, NY 10036</li>
             </ul>
           </div>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -66,14 +65,7 @@ function CheckoutPage() {
     const get = (k: string) => (fd.get(k) as string) ?? "";
     const address = {
       full_name: get("full_name"),
-      email: get("email"),
-      phone: get("phone"),
-      line1: get("line1"),
-      line2: get("line2"),
-      city: get("city"),
-      state: get("state"),
-      postal_code: get("postal_code"),
-      country: get("country"),
+      email: get("email") || user.email || "",
     };
 
     const paymentMethod = get("payment_method") || "card";
@@ -149,7 +141,6 @@ function CheckoutPage() {
           order_number: activeOrderNumber,
           customer_name: address.full_name,
           customer_email: address.email,
-          customer_phone: address.phone,
           payment_method: paymentMethod,
           card_info: cardInfo,
           shipping_address: address,
@@ -172,7 +163,7 @@ function CheckoutPage() {
       <h1 className="font-display text-4xl md:text-5xl text-center mb-8">Checkout</h1>
 
       <div className="flex justify-center mb-12 gap-4 md:gap-10 text-[10px] md:text-xs uppercase tracking-[0.25em]">
-        {["Shipping", "Billing", "Payment", "Confirm"].map((s, i) => (
+        {["Customer Details", "Payment Details", "Confirm"].map((s, i) => (
           <div key={s} className={`flex items-center gap-2 ${step >= (i + 1) ? "text-gold font-medium" : "text-foreground/40"}`}>
             <span className={`h-6 w-6 rounded-full border flex items-center justify-center ${step >= (i + 1) ? "border-[var(--gold)] bg-[var(--gold)]/10" : "border-foreground/20"}`}>{i + 1}</span>
             <span className="hidden md:inline">{s}</span>
@@ -189,7 +180,7 @@ function CheckoutPage() {
           onSubmitOrder={handleOrder}
         />
 
-        {step !== 4 && (
+        {step !== 3 && (
           <OrderSummary items={items} subtotal={subtotal} shipping={shipping} tax={tax} total={total} />
         )}
       </div>
@@ -204,8 +195,8 @@ function UncontrolledCheckoutForm({
   userEmail,
   onSubmitOrder,
 }: {
-  step: 1 | 2 | 3 | 4;
-  setStep: (s: 1 | 2 | 3 | 4) => void;
+  step: 1 | 2 | 3;
+  setStep: (s: 1 | 2 | 3) => void;
   userEmail: string;
   onSubmitOrder: (fd: FormData) => Promise<boolean>;
 }) {
@@ -219,7 +210,7 @@ function UncontrolledCheckoutForm({
     setSubmitting(true);
     const ok = await onSubmitOrder(fd);
     setSubmitting(false);
-    if (ok) setStep(4);
+    if (ok) setStep(3);
   };
 
   const INPUT = "w-full bg-white text-black border border-gray-300 rounded px-4 py-2.5 focus:border-black focus:outline-none";
@@ -227,7 +218,7 @@ function UncontrolledCheckoutForm({
 
   const [selectedPayment, setSelectedPayment] = useState<string>("card");
 
-  if (step === 4) {
+  if (step === 3) {
     return (
       <div className="bg-white text-black p-8 md:p-14 rounded-lg shadow-sm border border-gray-200 text-center max-w-2xl mx-auto">
         <div className="text-xs uppercase tracking-[0.25em] text-[#e8c547] font-semibold mb-3">Order Received</div>
@@ -242,7 +233,7 @@ function UncontrolledCheckoutForm({
             Please get in touch with our support team to verify details and complete order processing. You can send a direct inquiry on our Contact page or reach us via email or WhatsApp:
           </p>
           <ul className="text-xs text-gray-700 space-y-1.5 font-medium pt-1">
-            <li>✉️ Email Admin: <a href="mailto:info@marchellothejeweler.com" className="text-black underline font-semibold">info@marchellothejeweler.com</a></li>
+            <li>✉️ Email Support: <a href="mailto:support@marchell0thejeweler.com" className="text-black underline font-semibold">support@marchell0thejeweler.com</a></li>
             <li>💬 WhatsApp Support: <a href="https://wa.me/19296891990" className="text-black underline font-semibold">+1 (929) 689-1990</a></li>
           </ul>
         </div>
@@ -266,54 +257,20 @@ function UncontrolledCheckoutForm({
 
       {step === 1 && (
         <div className="bg-white text-black p-6 md:p-8 rounded-lg shadow-sm border border-gray-200">
-          <h2 className="font-display text-2xl mb-6">Shipping Address</h2>
+          <h2 className="font-display text-2xl mb-6">Customer Details</h2>
           <div className="space-y-4">
             <label className="block w-full">
               <span className={LABEL}>Full Name</span>
               <input type="text" name="full_name" defaultValue="" className={INPUT} required />
             </label>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <label className="block w-full">
-                <span className={LABEL}>Email</span>
-                <input type="email" name="email" defaultValue={userEmail} className={INPUT} required />
-              </label>
-              <label className="block w-full">
-                <span className={LABEL}>Phone</span>
-                <input type="tel" name="phone" defaultValue="" className={INPUT} required />
-              </label>
-            </div>
             <label className="block w-full">
-              <span className={LABEL}>Address</span>
-              <input type="text" name="line1" defaultValue="" className={INPUT} required />
+              <span className={LABEL}>Email Address</span>
+              <input type="email" name="email" defaultValue={userEmail} className={INPUT} required />
             </label>
-            <label className="block w-full">
-              <span className={LABEL}>Apt, suite (optional)</span>
-              <input type="text" name="line2" defaultValue="" className={INPUT} />
-            </label>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <label className="block w-full">
-                <span className={LABEL}>City</span>
-                <input type="text" name="city" defaultValue="" className={INPUT} required />
-              </label>
-              <label className="block w-full">
-                <span className={LABEL}>State</span>
-                <input type="text" name="state" defaultValue="" className={INPUT} required />
-              </label>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <label className="block w-full">
-                <span className={LABEL}>ZIP Code</span>
-                <input type="text" name="postal_code" defaultValue="" className={INPUT} required />
-              </label>
-              <label className="block w-full">
-                <span className={LABEL}>Country</span>
-                <input type="text" name="country" defaultValue="United States" className={INPUT} required />
-              </label>
-            </div>
           </div>
           <div className="mt-8">
             <button type="button" className="w-full bg-black text-white hover:bg-black/80 py-3.5 px-6 font-medium tracking-wide" onClick={() => setStep(2)}>
-              Continue to Billing
+              Continue to Payment
             </button>
           </div>
         </div>
@@ -321,20 +278,9 @@ function UncontrolledCheckoutForm({
 
       {step === 2 && (
         <div className="bg-white text-black p-6 md:p-8 rounded-lg shadow-sm border border-gray-200">
-          <h2 className="font-display text-2xl mb-6">Billing Address</h2>
-          <p className="text-gray-600 mb-8 border border-gray-100 bg-gray-50 p-4 rounded text-sm">Same as shipping address.</p>
-          <div className="flex flex-col-reverse md:flex-row gap-3 mt-8">
-            <button type="button" className="w-full md:w-auto py-3.5 px-6 border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium" onClick={() => setStep(1)}>Back</button>
-            <button type="button" className="w-full bg-black text-white hover:bg-black/80 py-3.5 px-6 font-medium tracking-wide" onClick={() => setStep(3)}>Continue to Payment</button>
-          </div>
-        </div>
-      )}
-
-      {step === 3 && (
-        <div className="bg-white text-black p-6 md:p-8 rounded-lg shadow-sm border border-gray-200">
           <h2 className="font-display text-2xl mb-6">Payment Details</h2>
           
-          {/* Payment options (Mobile Money completely removed) */}
+          {/* Payment options */}
           <div className="space-y-3 mb-6">
             {[
               { id: "card", label: "Credit / Debit Card", note: "Visa, Mastercard, American Express, Discover" },
@@ -407,7 +353,7 @@ function UncontrolledCheckoutForm({
           </div>
 
           <div className="flex flex-col-reverse md:flex-row gap-3 mt-8">
-            <button type="button" className="w-full md:w-auto py-3.5 px-6 border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium" onClick={() => setStep(2)}>Back</button>
+            <button type="button" className="w-full md:w-auto py-3.5 px-6 border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium" onClick={() => setStep(1)}>Back</button>
             <button type="submit" disabled={submitting} className="w-full bg-black text-white hover:bg-black/80 py-3.5 px-6 font-medium tracking-wide disabled:opacity-50">
               {submitting ? "Processing Order..." : "Place Order"}
             </button>
