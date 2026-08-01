@@ -54,8 +54,33 @@ function AccountPage() {
     },
   });
 
+  const { data: isAdmin } = useQuery({
+    queryKey: ["isAdmin", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user!.id)
+        .eq("role", "admin")
+        .maybeSingle();
+      return !!data;
+    },
+  });
+
   return (
     <div className="container-luxe py-12 md:py-16">
+      {isAdmin && (
+        <div className="mb-8 p-4 bg-gold/10 border border-gold/40 rounded-lg flex items-center justify-between flex-wrap gap-4">
+          <div>
+            <div className="text-xs uppercase tracking-widest font-bold text-gold">Super Admin Access</div>
+            <div className="text-sm font-medium text-foreground">You have full administrator privileges. Access the management console below.</div>
+          </div>
+          <Link to="/admin" className="btn-gold text-xs py-2 px-5 font-semibold uppercase tracking-wider">
+            Go to Admin Console →
+          </Link>
+        </div>
+      )}
       <div className="flex flex-wrap justify-between items-end mb-10 gap-4">
         <div>
           <div className="eyebrow">Your Account</div>

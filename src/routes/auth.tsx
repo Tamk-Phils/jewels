@@ -21,7 +21,23 @@ function AuthPage() {
   const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
 
-  const go = () => nav({ to: search.redirect ?? "/account" });
+  const go = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const { data: roleRow } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id)
+        .eq("role", "admin")
+        .maybeSingle();
+
+      if (roleRow) {
+        nav({ to: "/admin" });
+        return;
+      }
+    }
+    nav({ to: search.redirect ?? "/account" });
+  };
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
