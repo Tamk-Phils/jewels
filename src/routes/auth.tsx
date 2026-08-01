@@ -58,8 +58,22 @@ function AuthPage() {
 
   const google = async () => {
     setBusy(true);
-    toast.message("Google sign-in is unavailable in this local setup.");
-    setBusy(false);
+    try {
+      const redirectTo = typeof window !== "undefined"
+        ? `${window.location.origin}${search.redirect ? `?redirect=${encodeURIComponent(search.redirect)}` : "/account"}`
+        : undefined;
+
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo,
+        },
+      });
+      if (error) throw error;
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Google sign in failed");
+      setBusy(false);
+    }
   };
 
   return (
