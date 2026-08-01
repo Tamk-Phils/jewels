@@ -71,7 +71,12 @@ function AuthPage() {
       });
       if (error) throw error;
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Google sign in failed");
+      const msg = err instanceof Error ? err.message : "Google sign in failed";
+      if (msg.toLowerCase().includes("provider is not enabled") || msg.toLowerCase().includes("unsupported provider")) {
+        toast.error("Google login is currently disabled in your Supabase Auth settings. Please log in with Email & Password or enable Google in Supabase Dashboard.");
+      } else {
+        toast.error(msg);
+      }
       setBusy(false);
     }
   };
