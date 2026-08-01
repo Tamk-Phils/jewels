@@ -31,7 +31,7 @@ function netlifyFunctionsDevPlugin(): Plugin {
                 const { type, payload } = data;
                 const resendApiKey = process.env.RESEND_API_KEY;
                 const resend = resendApiKey ? new Resend(resendApiKey) : null;
-                const adminEmail = process.env.ADMIN_EMAIL || "phils7872@gmail.com";
+                const adminEmail = process.env.ADMIN_EMAIL || "support@marchell0thejeweler.com";
 
                 const sendMailHelper = async ({ to, subject, html, replyTo }: { to: string; subject: string; html: string; replyTo?: string }) => {
                   if (resend) {

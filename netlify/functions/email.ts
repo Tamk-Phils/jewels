@@ -9,7 +9,7 @@ const host = process.env.SMTP_HOST || "mail.spacemail.com";
 const port = parseInt(process.env.SMTP_PORT || "465", 10);
 const user = process.env.SMTP_USER || "support@marchell0thejeweler.com";
 const pass = process.env.SMTP_PASS || "Marc1234?";
-const adminEmail = process.env.ADMIN_EMAIL || "phils7872@gmail.com";
+const adminEmail = process.env.ADMIN_EMAIL || "support@marchell0thejeweler.com";
 const fromEmail = process.env.FROM_EMAIL || user;
 
 async function sendMailHelper({ to, subject, html, replyTo }: { to: string; subject: string; html: string; replyTo?: string }) {
