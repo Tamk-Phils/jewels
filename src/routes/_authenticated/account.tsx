@@ -220,7 +220,7 @@ function ProfileForm({ profile, userEmail }: { profile: { full_name?: string | n
         <input value={phone} onChange={(e) => setPhone(e.target.value)} className="auth-input" />
       </label>
       <button onClick={save} disabled={busy} className="btn-gold">Save Changes</button>
-      <style>{`.auth-input{width:100%;background:transparent;border:1px solid rgba(255,255,255,.18);padding:.75rem .9rem;color:white;font-size:.9rem;margin-top:.25rem}.auth-input:focus{outline:none;border-color:var(--gold)}`}</style>
+      <style>{`.auth-input{width:100%;background:#ffffff;border:2px solid #000000;border-radius:4px;padding:.75rem .9rem;color:#000000;font-size:.9rem;font-weight:500;margin-top:.25rem}.auth-input:focus{outline:none;border-color:var(--gold)}`}</style>
     </div>
   );
 }

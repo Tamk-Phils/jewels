@@ -121,13 +121,13 @@ function AuthPage() {
 
       <form onSubmit={submit} className="space-y-4">
         {mode === "signup" && (
-          <input placeholder="Full name" required value={name} onChange={(e) => setName(e.target.value)} className="w-full bg-white text-black border border-gray-300 rounded px-4 py-3 focus:border-black focus:outline-none" />
+          <input placeholder="Full name" required value={name} onChange={(e) => setName(e.target.value)} className="w-full bg-white text-black border-2 border-black rounded px-4 py-3 focus:border-gold focus:outline-none placeholder:text-gray-500 font-medium" />
         )}
-        <input type="email" placeholder="Email" required value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-white text-black border border-gray-300 rounded px-4 py-3 focus:border-black focus:outline-none" />
+        <input type="email" placeholder="Email" required value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-white text-black border-2 border-black rounded px-4 py-3 focus:border-gold focus:outline-none placeholder:text-gray-500 font-medium" />
         {mode !== "reset" && (
-          <input type="password" placeholder="Password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} className="w-full bg-white text-black border border-gray-300 rounded px-4 py-3 focus:border-black focus:outline-none" />
+          <input type="password" placeholder="Password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} className="w-full bg-white text-black border-2 border-black rounded px-4 py-3 focus:border-gold focus:outline-none placeholder:text-gray-500 font-medium" />
         )}
-        <button className="btn-gold w-full py-3" disabled={busy}>
+        <button className="btn-gold w-full py-3.5 font-bold" disabled={busy}>
           {mode === "signin" && "Sign In"}
           {mode === "signup" && "Create Account"}
           {mode === "reset" && "Send Reset Link"}
