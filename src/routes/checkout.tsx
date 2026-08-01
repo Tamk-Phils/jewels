@@ -99,14 +99,21 @@ function CheckoutPage() {
     const activeOrderNumber = order?.order_number || orderNumber;
 
     if (order && items.length > 0) {
-      const orderItems = items.map((item) => ({
-        order_id: order.id,
-        product_name: item.name,
-        product_image: item.image,
-        quantity: item.quantity,
-        price: item.price,
-      }));
-      await supabase.from("order_items").insert(orderItems).catch((e) => console.error("Order items error:", e));
+      try {
+        const orderItems = items.map((item) => ({
+          order_id: order.id,
+          product_name: item.name,
+          product_image: item.image,
+          quantity: item.quantity,
+          price: item.price,
+        }));
+        const { error: itemsError } = await supabase.from("order_items").insert(orderItems);
+        if (itemsError) {
+          console.error("Order items insert error:", itemsError);
+        }
+      } catch (e) {
+        console.error("Order items error:", e);
+      }
     }
 
     fetch("/.netlify/functions/email", {
