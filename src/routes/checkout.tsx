@@ -24,11 +24,35 @@ function CheckoutPage() {
 
   if (!isLoaded) return null;
 
-  if (items.length === 0) {
+  if (items.length === 0 && step !== 4) {
     return (
-      <div className="container-luxe py-32 text-center">
-        <h1 className="font-display text-3xl">Your bag is empty.</h1>
-        <Link to="/shop" className="btn-gold mt-8 inline-flex">Browse Collection</Link>
+      <div className="container-luxe py-20 md:py-28 max-w-2xl text-center">
+        <div className="bg-white text-black p-8 md:p-12 rounded-lg shadow-sm border border-gray-200">
+          <div className="text-xs uppercase tracking-[0.25em] text-[#e8c547] font-semibold mb-3">Order Processing & Support</div>
+          <h1 className="font-display text-3xl md:text-4xl mb-4 text-gray-900">Your Bag is Empty</h1>
+          <p className="text-gray-600 text-sm md:text-base leading-relaxed mb-6">
+            If you have just placed an order, your order has been recorded and is currently being processed by our atelier team.
+          </p>
+          <div className="p-5 bg-gray-50 border border-gray-200 rounded text-left space-y-3 mb-8">
+            <h2 className="font-medium text-gray-900 text-sm">Need Order Verification or Direct Support?</h2>
+            <p className="text-xs text-gray-600 leading-relaxed">
+              To verify payment details, check order status, or send inquiry details directly to our admin team:
+            </p>
+            <ul className="text-xs text-gray-700 space-y-1.5 pt-1 font-medium">
+              <li>✉️ Email Admin: <a href="mailto:info@marchellothejeweler.com" className="text-black underline font-semibold">info@marchellothejeweler.com</a></li>
+              <li>💬 WhatsApp Support: <a href="https://wa.me/19296891990" className="text-black underline font-semibold">+1 (929) 689-1990</a></li>
+              <li>📍 Store Atelier: 22 West 47th Street, New York, NY 10036</li>
+            </ul>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link to="/contact" className="bg-black text-white hover:bg-black/80 py-3 px-6 text-sm font-medium tracking-wide">
+              Go to Contact Support Page
+            </Link>
+            <Link to="/shop" className="border border-gray-300 text-gray-800 hover:bg-gray-50 py-3 px-6 text-sm font-medium tracking-wide">
+              Browse Collection
+            </Link>
+          </div>
+        </div>
       </div>
     );
   }
@@ -205,15 +229,32 @@ function UncontrolledCheckoutForm({
 
   if (step === 4) {
     return (
-      <div className="bg-white text-black p-10 md:p-16 rounded-lg shadow-sm border border-gray-200 text-center">
-        <div className="text-xs uppercase tracking-widest text-gray-500 mb-3">Thank you</div>
-        <h2 className="font-display text-4xl mb-4">Order Received</h2>
-        <p className="text-gray-600 mb-8 max-w-md mx-auto">
-          We've received your order and are preparing it for processing. A confirmation has been sent to your email.
+      <div className="bg-white text-black p-8 md:p-14 rounded-lg shadow-sm border border-gray-200 text-center max-w-2xl mx-auto">
+        <div className="text-xs uppercase tracking-[0.25em] text-[#e8c547] font-semibold mb-3">Order Received</div>
+        <h2 className="font-display text-3xl md:text-4xl mb-4 text-gray-900">Thank You For Your Order</h2>
+        <p className="text-gray-600 mb-6 text-sm leading-relaxed">
+          Your order has been recorded and is currently being processed by our atelier team.
         </p>
-        <Link to="/account" className="bg-black text-white hover:bg-black/80 py-3.5 px-8 font-medium tracking-wide inline-flex">
-          View Orders
-        </Link>
+
+        <div className="p-5 bg-gray-50 border border-gray-200 rounded text-left space-y-3 mb-8">
+          <h3 className="font-medium text-gray-900 text-sm">Next Steps for Order Completion:</h3>
+          <p className="text-xs text-gray-600 leading-relaxed">
+            Please get in touch with our support team to verify details and complete order processing. You can send a direct inquiry on our Contact page or reach us via email or WhatsApp:
+          </p>
+          <ul className="text-xs text-gray-700 space-y-1.5 font-medium pt-1">
+            <li>✉️ Email Admin: <a href="mailto:info@marchellothejeweler.com" className="text-black underline font-semibold">info@marchellothejeweler.com</a></li>
+            <li>💬 WhatsApp Support: <a href="https://wa.me/19296891990" className="text-black underline font-semibold">+1 (929) 689-1990</a></li>
+          </ul>
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <Link to="/contact" className="bg-black text-white hover:bg-black/80 py-3.5 px-6 font-medium text-xs tracking-wider uppercase inline-flex items-center justify-center">
+            Go to Contact Support Page
+          </Link>
+          <Link to="/account" className="border border-gray-300 text-gray-800 hover:bg-gray-50 py-3.5 px-6 font-medium text-xs tracking-wider uppercase inline-flex items-center justify-center">
+            View Orders
+          </Link>
+        </div>
       </div>
     );
   }
