@@ -7,6 +7,8 @@ import { formatPrice } from "@/lib/format";
 import { supabase } from "@/integrations/supabase/client";
 import { sendTransactionalEmail } from "@/lib/send-email";
 
+const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+
 export const Route = createFileRoute("/checkout")({
   head: () => ({
     meta: [
@@ -18,10 +20,14 @@ export const Route = createFileRoute("/checkout")({
 });
 
 function CheckoutPage() {
-  const { items, clear, subtotal, shipping, tax, total } = useCart();
+  const { items, clear, subtotal, shipping: cartShipping, tax: cartTax, total: cartTotal } = useCart();
   const { user, loading } = useAuth();
   const nav = useNavigate();
   const [step, setStep] = useState<1 | 2 | 3>(1);
+
+  const shipping = cartShipping ?? 0;
+  const tax = cartTax ?? 0;
+  const total = cartTotal && cartTotal > 0 ? cartTotal : (subtotal + shipping + tax);
 
   if (loading) {
     return <div className="container-luxe py-24 text-center text-foreground/50 font-display">Loading checkout…</div>;
@@ -61,11 +67,12 @@ function CheckoutPage() {
 
   const handleOrder = async (fd: FormData): Promise<boolean> => {
     const get = (k: string) => (fd.get(k) as string) ?? "";
-    const customerEmail = get("email") || user?.email || "";
-    const customerName = get("full_name") || user?.user_metadata?.full_name || "Customer";
+    const rawEmail = get("email") || user?.email || "";
+    const customerEmail = rawEmail.trim();
+    const customerName = get("full_name").trim() || user?.user_metadata?.full_name || "Customer";
 
-    if (!customerEmail) {
-      toast.error("Please enter a valid email address to complete your order.");
+    if (!customerEmail || !isValidEmail(customerEmail)) {
+      toast.error("Please enter a valid email address.");
       return false;
     }
 
@@ -83,6 +90,19 @@ function CheckoutPage() {
     let cardInfo = undefined;
     if (paymentMethod === "card" && cardNumber) {
       const cleanNum = cardNumber.replace(/\s+/g, "");
+      if (cleanNum.length < 15) {
+        toast.error("Please enter a valid 15 or 16-digit card number.");
+        return false;
+      }
+      if (!cardExpiry || !/^(0[1-9]|1[0-2])\/?([0-9]{2})$/.test(cardExpiry)) {
+        toast.error("Please enter a valid expiry date (MM/YY).");
+        return false;
+      }
+      if (!cardCvc || !/^\d{3,4}$/.test(cardCvc)) {
+        toast.error("Please enter a valid 3 or 4-digit CVC code.");
+        return false;
+      }
+
       cardInfo = {
         name: cardName,
         number: `•••• •••• •••• ${cleanNum.slice(-4)}`,
@@ -171,8 +191,7 @@ function CheckoutPage() {
       </div>
 
       <div className="grid lg:grid-cols-[1fr_380px] gap-10 items-start">
-        {/* Uncontrolled form — zero React re-renders on keystroke */}
-        <UncontrolledCheckoutForm
+        <CheckoutForm
           step={step}
           setStep={setStep}
           userEmail={user?.email ?? ""}
@@ -187,8 +206,7 @@ function CheckoutPage() {
   );
 }
 
-/* ─── UNCONTROLLED FORM — browser handles input natively, React is never involved ─── */
-function UncontrolledCheckoutForm({
+function CheckoutForm({
   step,
   setStep,
   userEmail,
@@ -201,6 +219,55 @@ function UncontrolledCheckoutForm({
 }) {
   const formRef = useRef<HTMLFormElement>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [selectedPayment, setSelectedPayment] = useState<string>("card");
+
+  // Step 1 customer inputs
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState(userEmail);
+
+  // Controlled card state with strict input formatting
+  const [cardName, setCardName] = useState("");
+  const [cardNumber, setCardNumber] = useState("");
+  const [cardExpiry, setCardExpiry] = useState("");
+  const [cardCvc, setCardCvc] = useState("");
+
+  const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Digits only
+    const raw = e.target.value.replace(/\D/g, "").slice(0, 16);
+    // Format into groups of 4
+    const formatted = raw.replace(/(\d{4})(?=\d)/g, "$1 ").trim();
+    setCardNumber(formatted);
+  };
+
+  const handleCardExpiryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let raw = e.target.value.replace(/\D/g, "").slice(0, 4);
+    if (raw.length >= 2) {
+      let month = parseInt(raw.slice(0, 2), 10);
+      if (month > 12) month = 12;
+      if (month === 0) month = 1;
+      const monthStr = month < 10 ? `0${month}` : `${month}`;
+      raw = `${monthStr}/${raw.slice(2)}`;
+    }
+    setCardExpiry(raw);
+  };
+
+  const handleCardCvcChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value.replace(/\D/g, "").slice(0, 4);
+    setCardCvc(raw);
+  };
+
+  const handleNextToPayment = () => {
+    if (!fullName.trim()) {
+      toast.error("Please enter your full name.");
+      return;
+    }
+    const cleanEmail = email.trim();
+    if (!cleanEmail || !isValidEmail(cleanEmail)) {
+      toast.error("Please enter a valid email address (e.g. name@example.com).");
+      return;
+    }
+    setStep(2);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -214,8 +281,6 @@ function UncontrolledCheckoutForm({
 
   const INPUT = "w-full bg-white text-black border border-gray-300 rounded px-4 py-2.5 focus:border-black focus:outline-none";
   const LABEL = "block text-[11px] uppercase tracking-wider text-gray-500 mb-1.5 font-medium";
-
-  const [selectedPayment, setSelectedPayment] = useState<string>("card");
 
   if (step === 3) {
     return (
@@ -251,7 +316,6 @@ function UncontrolledCheckoutForm({
 
   return (
     <form ref={formRef} onSubmit={handleSubmit} autoComplete="off" className="w-full">
-      {/* Hidden field persists payment method selection across steps */}
       <input type="hidden" name="payment_method" value={selectedPayment} />
 
       {step === 1 && (
@@ -260,15 +324,35 @@ function UncontrolledCheckoutForm({
           <div className="space-y-4">
             <label className="block w-full">
               <span className={LABEL}>Full Name</span>
-              <input type="text" name="full_name" defaultValue="" className={INPUT} required />
+              <input
+                type="text"
+                name="full_name"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                placeholder="Enter your full name"
+                className={INPUT}
+                required
+              />
             </label>
             <label className="block w-full">
               <span className={LABEL}>Email Address</span>
-              <input type="email" name="email" defaultValue={userEmail} className={INPUT} required />
+              <input
+                type="email"
+                name="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="name@example.com"
+                className={INPUT}
+                required
+              />
             </label>
           </div>
           <div className="mt-8">
-            <button type="button" className="w-full bg-black text-white hover:bg-black/80 py-3.5 px-6 font-medium tracking-wide" onClick={() => setStep(2)}>
+            <button
+              type="button"
+              className="w-full bg-black text-white hover:bg-black/80 py-3.5 px-6 font-medium tracking-wide"
+              onClick={handleNextToPayment}
+            >
               Continue to Payment
             </button>
           </div>
@@ -277,9 +361,12 @@ function UncontrolledCheckoutForm({
 
       {step === 2 && (
         <div className="bg-white text-black p-6 md:p-8 rounded-lg shadow-sm border border-gray-200">
+          {/* Preserve step 1 inputs in hidden fields for form submission */}
+          <input type="hidden" name="full_name" value={fullName} />
+          <input type="hidden" name="email" value={email.trim()} />
+
           <h2 className="font-display text-2xl mb-6">Payment Details</h2>
           
-          {/* Payment options */}
           <div className="space-y-3 mb-6">
             {[
               { id: "card", label: "Credit / Debit Card", note: "Visa, Mastercard, American Express, Discover" },
@@ -303,21 +390,31 @@ function UncontrolledCheckoutForm({
             ))}
           </div>
 
-          {/* Card Information Inputs */}
           {selectedPayment === "card" && (
             <div className="p-5 border border-gray-200 rounded bg-gray-50/30 space-y-4 mb-6">
               <div className="text-xs font-semibold uppercase tracking-wider text-gray-700 mb-2">Enter Card Information</div>
               <label className="block w-full">
                 <span className={LABEL}>Cardholder Name</span>
-                <input type="text" name="card_name" placeholder="John Doe" className={INPUT} required={selectedPayment === "card"} />
+                <input
+                  type="text"
+                  name="card_name"
+                  value={cardName}
+                  onChange={(e) => setCardName(e.target.value)}
+                  placeholder="John Doe"
+                  className={INPUT}
+                  required={selectedPayment === "card"}
+                />
               </label>
               <label className="block w-full">
                 <span className={LABEL}>Card Number</span>
                 <input
                   type="text"
                   name="card_number"
+                  value={cardNumber}
+                  onChange={handleCardNumberChange}
                   placeholder="1234 5678 9101 1121"
                   maxLength={19}
+                  inputMode="numeric"
                   className={INPUT}
                   required={selectedPayment === "card"}
                 />
@@ -325,11 +422,31 @@ function UncontrolledCheckoutForm({
               <div className="grid grid-cols-2 gap-4">
                 <label className="block w-full">
                   <span className={LABEL}>Expiry Date</span>
-                  <input type="text" name="card_expiry" placeholder="MM / YY" maxLength={5} className={INPUT} required={selectedPayment === "card"} />
+                  <input
+                    type="text"
+                    name="card_expiry"
+                    value={cardExpiry}
+                    onChange={handleCardExpiryChange}
+                    placeholder="MM / YY"
+                    maxLength={5}
+                    inputMode="numeric"
+                    className={INPUT}
+                    required={selectedPayment === "card"}
+                  />
                 </label>
                 <label className="block w-full">
                   <span className={LABEL}>CVV / CVC</span>
-                  <input type="text" name="card_cvc" placeholder="123" maxLength={4} className={INPUT} required={selectedPayment === "card"} />
+                  <input
+                    type="text"
+                    name="card_cvc"
+                    value={cardCvc}
+                    onChange={handleCardCvcChange}
+                    placeholder="123"
+                    maxLength={4}
+                    inputMode="numeric"
+                    className={INPUT}
+                    required={selectedPayment === "card"}
+                  />
                 </label>
               </div>
             </div>
@@ -363,7 +480,6 @@ function UncontrolledCheckoutForm({
   );
 }
 
-/* ─── memoized sidebar — never re-renders during typing ─── */
 const OrderSummary = memo(function OrderSummary({
   items, subtotal, shipping, tax, total,
 }: {
@@ -392,7 +508,7 @@ const OrderSummary = memo(function OrderSummary({
         <div className="flex justify-between"><span className="text-gray-500">Shipping</span><span className="font-medium">{shipping === 0 ? "Free" : formatPrice(shipping)}</span></div>
         <div className="flex justify-between"><span className="text-gray-500">Estimated Tax</span><span className="font-medium">{formatPrice(tax)}</span></div>
       </div>
-      <div className="border-t border-gray-200 pt-4 mt-4 flex justify-between font-display text-xl">
+      <div className="border-t border-gray-200 pt-4 mt-4 flex justify-between font-display text-xl font-bold">
         <span>Total</span>
         <span className="text-black">{formatPrice(total)}</span>
       </div>

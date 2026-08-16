@@ -17,6 +17,9 @@ type CartCtx = {
   clear: () => void;
   count: number;
   subtotal: number;
+  shipping: number;
+  tax: number;
+  total: number;
   isLoaded: boolean;
 };
 
@@ -48,26 +51,36 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   }, [items, isLoaded]);
 
-  const value = useMemo<CartCtx>(() => ({
-    items,
-    add: (item, qty = 1) => setItems((cur) => {
-      const idx = cur.findIndex((i) => i.id === item.id);
-      if (idx >= 0) {
-        const next = [...cur];
-        next[idx] = { ...next[idx], quantity: next[idx].quantity + qty };
-        return next;
-      }
-      return [...cur, { ...item, quantity: qty }];
-    }),
-    remove: (id) => setItems((cur) => cur.filter((i) => i.id !== id)),
-    setQty: (id, qty) => setItems((cur) =>
-      cur.map((i) => i.id === id ? { ...i, quantity: Math.max(1, qty) } : i)
-    ),
-    clear: () => setItems([]),
-    count: items.reduce((s, i) => s + i.quantity, 0),
-    subtotal: items.reduce((s, i) => s + i.price * i.quantity, 0),
-    isLoaded,
-  }), [items, isLoaded]);
+  const value = useMemo<CartCtx>(() => {
+    const subtotal = items.reduce((s, i) => s + i.price * i.quantity, 0);
+    const shipping = 0;
+    const tax = 0;
+    const total = subtotal + shipping + tax;
+
+    return {
+      items,
+      add: (item, qty = 1) => setItems((cur) => {
+        const idx = cur.findIndex((i) => i.id === item.id);
+        if (idx >= 0) {
+          const next = [...cur];
+          next[idx] = { ...next[idx], quantity: next[idx].quantity + qty };
+          return next;
+        }
+        return [...cur, { ...item, quantity: qty }];
+      }),
+      remove: (id) => setItems((cur) => cur.filter((i) => i.id !== id)),
+      setQty: (id, qty) => setItems((cur) =>
+        cur.map((i) => i.id === id ? { ...i, quantity: Math.max(1, qty) } : i)
+      ),
+      clear: () => setItems([]),
+      count: items.reduce((s, i) => s + i.quantity, 0),
+      subtotal,
+      shipping,
+      tax,
+      total,
+      isLoaded,
+    };
+  }, [items, isLoaded]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
