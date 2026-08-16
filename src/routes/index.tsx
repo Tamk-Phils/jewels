@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { fetchProducts } from "@/lib/catalog-service";
 import { supabase } from "@/integrations/supabase/client";
 import { ProductCard, type ProductCardProduct } from "@/components/product-card";
 import { categoryImage, productPrimaryImage } from "@/lib/product-image";
@@ -112,13 +113,7 @@ function HomePage() {
   const { data: products = [] } = useQuery({
     queryKey: ["home-products"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("products")
-        .select("id,name,slug,price,sale_price,is_new,is_bestseller,is_featured,images,media,material,gender,category:categories(slug,name)")
-        .eq("is_published", true)
-        .order("created_at", { ascending: false })
-        .limit(50);
-      if (error) throw error;
+      const data = await fetchProducts({ limit: 50 });
       return (data ?? []) as unknown as HomeProduct[];
     },
   });
@@ -154,14 +149,7 @@ function HomePage() {
   const { data: chains = [] } = useQuery({
     queryKey: ["home-chains"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("products")
-        .select("id,name,slug,price,sale_price,is_new,is_bestseller,is_featured,images,media,category:categories(slug,name)")
-        .eq("is_published", true)
-        .filter("category.slug", "eq", "chains")
-        .order("created_at", { ascending: false })
-        .limit(8);
-      if (error) throw error;
+      const data = await fetchProducts({ category_slug: "chains", limit: 8 });
       return (data ?? []) as unknown as HomeProduct[];
     },
   });
@@ -169,15 +157,7 @@ function HomePage() {
   const { data: ringsUnder1500 = [] } = useQuery({
     queryKey: ["home-rings-under-1500"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("products")
-        .select("id,name,slug,price,sale_price,is_new,is_bestseller,is_featured,images,media,category:categories(slug,name)")
-        .eq("is_published", true)
-        .filter("category.slug", "eq", "rings")
-        .filter("price", "lte", 1500)
-        .order("created_at", { ascending: false })
-        .limit(8);
-      if (error) throw error;
+      const data = await fetchProducts({ category_slug: "rings", maxPrice: 1500, limit: 8 });
       return (data ?? []) as unknown as HomeProduct[];
     },
   });
@@ -185,14 +165,7 @@ function HomePage() {
   const { data: homeWatches = [] } = useQuery({
     queryKey: ["home-watches"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("products")
-        .select("id,name,slug,price,sale_price,is_new,is_bestseller,is_featured,images,media,category:categories(slug,name)")
-        .eq("is_published", true)
-        .filter("category.slug", "eq", "watches")
-        .order("created_at", { ascending: false })
-        .limit(8);
-      if (error) throw error;
+      const data = await fetchProducts({ category_slug: "watches", limit: 8 });
       return (data ?? []) as unknown as HomeProduct[];
     },
   });

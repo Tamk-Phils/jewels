@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import useEmblaCarousel from "embla-carousel-react";
 import { Heart, Share2, Truck, ShieldCheck, ChevronDown, Play } from "lucide-react";
+import { fetchProductBySlug, fetchProducts } from "@/lib/catalog-service";
 import { supabase } from "@/integrations/supabase/client";
 import { formatPrice } from "@/lib/format";
 import { productPrimaryImage, resolveImage } from "@/lib/product-image";
@@ -14,12 +15,7 @@ import type { MediaItem } from "@/lib/media";
 
 export const Route = createFileRoute("/product/$slug")({
   loader: async ({ params }) => {
-    const { data } = await supabase
-      .from("products")
-      .select("name,slug,description,price,sale_price,images,stock,sku,material,category:categories(slug,name)")
-      .eq("slug", params.slug)
-      .eq("is_published", true)
-      .maybeSingle();
+    const data = await fetchProductBySlug(params.slug);
     return { product: data };
   },
   head: ({ params, loaderData }) => {
@@ -117,13 +113,7 @@ function ProductPage() {
   const { data: product, isLoading, error } = useQuery({
     queryKey: ["product", slug],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("products")
-        .select("*,category:categories(slug,name)")
-        .eq("slug", slug)
-        .eq("is_published", true)
-        .maybeSingle();
-      if (error) throw error;
+      const data = await fetchProductBySlug(slug);
       return data;
     },
   });
@@ -132,14 +122,13 @@ function ProductPage() {
     enabled: !!product,
     queryKey: ["related", product?.category_id, product?.id],
     queryFn: async () => {
-      const { data } = await supabase
-        .from("products")
-        .select("id,name,slug,price,sale_price,is_new,images,category:categories(slug,name)")
-        .eq("is_published", true)
-        .eq("category_id", product!.category_id!)
-        .neq("id", product!.id)
-        .limit(4);
-      return (data ?? []) as unknown as ProductCardProduct[];
+      if (!product) return [];
+      const data = await fetchProducts({
+        category_id: product.category_id ?? undefined,
+        limit: 8,
+      });
+      const filtered = data.filter((p: any) => p.id !== product.id).slice(0, 4);
+      return filtered as unknown as ProductCardProduct[];
     },
   });
 

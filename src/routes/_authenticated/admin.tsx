@@ -8,6 +8,7 @@ import {
   Clock, Truck, AlertTriangle, Eye, UserPlus, Sparkles
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchProducts, fetchCategories, saveProductToStore, removeProductFromStore } from "@/lib/catalog-service";
 import { useAuth } from "@/lib/auth";
 import { formatPrice } from "@/lib/format";
 import { MediaUploader } from "@/components/media-uploader";
@@ -146,11 +147,8 @@ function AdminPage() {
     enabled: isAdmin === true,
     queryKey: ["admin-products"],
     queryFn: async () => {
-      const { data } = await supabase
-        .from("products")
-        .select("id,name,slug,price,sale_price,stock,is_published,is_new,is_bestseller,is_featured,description,material,category_id,media")
-        .order("created_at", { ascending: false });
-      return (data ?? []) as ProductRow[];
+      const data = await fetchProducts({ is_published: undefined });
+      return (data ?? []) as unknown as ProductRow[];
     },
   });
 
@@ -158,8 +156,8 @@ function AdminPage() {
     enabled: isAdmin === true,
     queryKey: ["admin-categories"],
     queryFn: async () => {
-      const { data } = await supabase.from("categories").select("id,name,slug,sort_order").order("sort_order");
-      return data ?? [];
+      const data = await fetchCategories();
+      return (data ?? []) as any[];
     },
   });
 
@@ -233,12 +231,9 @@ function AdminPage() {
   // Product Deletion
   const removeProduct = async (id: string) => {
     if (!confirm("Are you sure you want to delete this product? This action cannot be undone.")) return;
-    const { error } = await supabase.from("products").delete().eq("id", id);
-    if (error) toast.error(error.message);
-    else {
-      toast.success("Product deleted successfully");
-      qc.invalidateQueries({ queryKey: ["admin-products"] });
-    }
+    await removeProductFromStore(id);
+    toast.success("Product deleted successfully");
+    qc.invalidateQueries({ queryKey: ["admin-products"] });
   };
 
   // Filtered Products
@@ -880,31 +875,26 @@ function ProductEditor({
       return;
     }
     setSaving(true);
-    const payload = {
+    const mediaUrls = (form.media ?? []).map((m: any) => typeof m === "string" ? m : m.url).filter(Boolean);
+    await saveProductToStore({
+      id: form.id,
       name: form.name,
       slug: form.slug,
-      description: form.description ?? null,
+      description: form.description ?? "",
       price: Number(form.price ?? 0),
       sale_price: form.sale_price != null && String(form.sale_price).length > 0 ? Number(form.sale_price) : null,
       stock: Number(form.stock ?? 0),
-      material: form.material ?? null,
-      category_id: form.category_id ?? null,
-      is_published: !!form.is_published,
+      material: form.material ?? "18k Gold",
+      category_id: form.category_id ?? "11111111-1111-1111-1111-111111111111",
+      is_published: form.is_published !== undefined ? !!form.is_published : true,
       is_new: !!form.is_new,
       is_bestseller: !!form.is_bestseller,
       is_featured: !!form.is_featured,
-      media: (form.media ?? []) as unknown as never,
-    };
-    const q = form.id
-      ? supabase.from("products").update(payload).eq("id", form.id)
-      : supabase.from("products").insert(payload);
-    const { error } = await q;
+      images: mediaUrls,
+    });
     setSaving(false);
-    if (error) toast.error(error.message);
-    else {
-      toast.success("Product saved successfully");
-      onSaved();
-    }
+    toast.success("Product saved successfully");
+    onSaved();
   };
 
   return (

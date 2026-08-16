@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { fetchProducts, fetchCategories } from "@/lib/catalog-service";
 import { ProductCard, type ProductCardProduct } from "@/components/product-card";
 import { SlidersHorizontal } from "lucide-react";
 
@@ -112,8 +112,8 @@ export function Shop({ categorySlug }: { categorySlug?: string } = {}) {
   const { data: cats = [] } = useQuery({
     queryKey: ["categories"],
     queryFn: async () => {
-      const { data } = await supabase.from("categories").select("id,name,slug").order("sort_order");
-      return data ?? [];
+      const data = await fetchCategories();
+      return (data ?? []) as Array<{ id: string; name: string; slug: string }>;
     },
   });
 
@@ -122,63 +122,43 @@ export function Shop({ categorySlug }: { categorySlug?: string } = {}) {
   const { data: productsData, isLoading } = useQuery({
     queryKey: ["products", page, selectedCategory?.id ?? cat, material, gender, specialsOnly, inStock, priceMax, sort],
     queryFn: async () => {
-      let query = supabase
-        .from("products")
-        .select(
-          "id,name,slug,price,sale_price,stock,material,gold_type,gender,is_new,is_bestseller,is_featured,images,created_at,category:categories(slug,name)",
-          { count: "exact" },
-        )
-        .eq("is_published", true);
-
-      if (cat !== "all") {
-        if (!selectedCategory) {
-          // If category slug is provided but not matched yet, attempt direct query by category.slug
-          const matchCat = cats.find(c => c.slug === cat);
-          if (matchCat) {
-            query = query.eq("category_id", matchCat.id);
-          }
-        } else {
-          query = query.eq("category_id", selectedCategory.id);
-        }
-      }
-
-      if (material !== "all") {
-        if (material === "Lab") {
-          query = query.or("name.ilike.%lab%,tags.ilike.%lab%");
-        } else {
-          query = query.eq("material", material);
-        }
-      }
-
-      if (gender !== "all") {
-        query = query.eq("gender", gender);
-      }
+      let fetched = await fetchProducts({
+        category_id: selectedCategory?.id,
+        category_slug: cat !== "all" && !selectedCategory ? cat : undefined,
+        material: material !== "all" ? material : undefined,
+        gender: gender !== "all" ? gender : undefined,
+        maxPrice: priceMax,
+        is_published: true,
+      });
 
       if (specialsOnly) {
-        query = query.or("is_bestseller.eq.true,is_featured.eq.true,sale_price.not.is.null");
+        fetched = fetched.filter((p: any) => p.is_bestseller || p.is_featured || p.sale_price != null);
       }
 
-      if (inStock) query = query.gt("stock", 0);
-      query = query.lte("price", priceMax);
+      if (inStock) {
+        fetched = fetched.filter((p: any) => p.stock > 0);
+      }
 
-      if (sort === "new") query = query.order("created_at", { ascending: false });
-      if (sort === "best") query = query.order("is_bestseller", { ascending: false });
-      if (sort === "asc") query = query.order("price", { ascending: true });
-      if (sort === "desc") query = query.order("price", { ascending: false });
+      // Sort
+      if (sort === "new") {
+        fetched.sort((a: any, b: any) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime());
+      } else if (sort === "best") {
+        fetched.sort((a: any, b: any) => (b.is_bestseller ? 1 : 0) - (a.is_bestseller ? 1 : 0));
+      } else if (sort === "asc") {
+        fetched.sort((a: any, b: any) => (Number(a.sale_price ?? a.price)) - (Number(b.sale_price ?? b.price)));
+      } else if (sort === "desc") {
+        fetched.sort((a: any, b: any) => (Number(b.sale_price ?? b.price)) - (Number(a.sale_price ?? a.price)));
+      }
 
-      const from = (page - 1) * PAGE_SIZE;
-      const to = from + PAGE_SIZE - 1;
-
-      const { data, error, count } = await query.range(from, to);
-
-      if (error) throw error;
+      const totalCount = fetched.length;
+      const sliced = fetched.slice(0, page * PAGE_SIZE);
 
       return {
-        products: (data ?? []) as unknown as (ProductCardProduct & {
+        products: sliced as unknown as (ProductCardProduct & {
           stock: number; material: string | null; gender: string | null;
           is_bestseller?: boolean; created_at: string;
         })[],
-        count: count ?? 0,
+        count: totalCount,
       };
     },
   });

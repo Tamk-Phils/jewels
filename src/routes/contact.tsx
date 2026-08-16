@@ -16,6 +16,8 @@ export const Route = createFileRoute("/contact")({
   component: ContactPage,
 });
 
+import { sendTransactionalEmail } from "@/lib/send-email";
+
 function ContactPage() {
   const [form, setForm] = useState({ name: "", email: "", message: "" });
   const [submitting, setSubmitting] = useState(false);
@@ -24,12 +26,7 @@ function ContactPage() {
     e.preventDefault();
     setSubmitting(true);
     try {
-      const response = await fetch('/.netlify/functions/email', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: 'contact', payload: form }),
-      });
-      const result = await response.json();
+      const result = await sendTransactionalEmail("contact", form);
       if (result.success) {
         toast.success("Message sent. We'll be in touch.");
         setForm({ name: "", email: "", message: "" });

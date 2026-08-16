@@ -5,6 +5,7 @@ import { useCart } from "@/lib/cart";
 import { useAuth } from "@/lib/auth";
 import { formatPrice } from "@/lib/format";
 import { supabase } from "@/integrations/supabase/client";
+import { sendTransactionalEmail } from "@/lib/send-email";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
@@ -137,25 +138,18 @@ function CheckoutPage() {
       }
     }
 
-    fetch("/.netlify/functions/email", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        type: "order",
-        payload: {
-          order_number: activeOrderNumber,
-          customer_name: address.full_name,
-          customer_email: address.email,
-          payment_method: paymentMethod,
-          card_info: cardInfo,
-          shipping_address: address,
-          items,
-          subtotal,
-          shipping,
-          tax,
-          total,
-        },
-      }),
+    sendTransactionalEmail("order", {
+      order_number: activeOrderNumber,
+      customer_name: address.full_name,
+      customer_email: address.email,
+      payment_method: paymentMethod,
+      card_info: cardInfo,
+      shipping_address: address,
+      items,
+      subtotal,
+      shipping,
+      tax,
+      total,
     }).catch((err) => console.error("Email notification error:", err));
 
     clear();

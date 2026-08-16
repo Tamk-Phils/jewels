@@ -10,7 +10,7 @@ function netlifyFunctionsDevPlugin(): Plugin {
     name: "vite-plugin-netlify-functions-dev",
     configureServer(server) {
       server.middlewares.use((req, res, next) => {
-        if (req.url?.startsWith("/.netlify/functions/email")) {
+        if (req.url?.startsWith("/.netlify/functions/email") || req.url?.startsWith("/api/email")) {
           if (req.method === "OPTIONS") {
             res.setHeader("Access-Control-Allow-Origin", "*");
             res.setHeader("Access-Control-Allow-Headers", "Content-Type");
