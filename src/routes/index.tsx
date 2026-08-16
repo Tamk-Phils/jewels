@@ -269,12 +269,12 @@ function HomePage() {
         <div className="container-luxe text-center max-w-2xl mx-auto">
           <h2 className="font-display text-3xl md:text-4xl">Make An Appointment</h2>
           <p className="mt-4 text-foreground/65">
-            Personalized service for your jewelry needs. Schedule an appointment with us to view and
+            Personalized service for your jewelry needs. Contact us to schedule an inquiry to view and
             purchase high-quality jewelry.
           </p>
-          <a href="https://wa.me/19296891990" className="btn-gold mt-8 inline-flex">
-            Schedule
-          </a>
+          <Link to="/contact" className="btn-gold mt-8 inline-flex">
+            Get in Touch
+          </Link>
         </div>
       </section>
 
@@ -494,15 +494,14 @@ function HomePage() {
               </h2>
               <p className="mt-4 text-white/75 text-sm">Your Personal Jewelry Shopper</p>
               <p className="mt-4 text-sm">
-                Call / Text / WhatsApp:{" "}
-                <a href="tel:+19296891990" className="text-[#e8c547] hover:underline">
-                  +1 (929) 689-1990
-                </a>{" "}
-                / Eden
+                Email Support:{" "}
+                <a href="mailto:support@marchell0thejeweler.com" className="text-[#e8c547] hover:underline">
+                  support@marchell0thejeweler.com
+                </a>
               </p>
-              <a href="tel:+19296891990" className="btn-gold mt-6 inline-flex">
-                Call Us
-              </a>
+              <Link to="/contact" className="btn-gold mt-6 inline-flex">
+                Contact Us
+              </Link>
             </div>
           </div>
         </div>

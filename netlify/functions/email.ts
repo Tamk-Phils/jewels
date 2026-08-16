@@ -143,7 +143,7 @@ export const handler: Handler = async (event) => {
               </div>
 
               <p style="font-size: 13px; color: #666; margin-top: 20px;">
-                For immediate shopping assistance, connect with Eden directly via WhatsApp: <a href="https://wa.me/19296891990" style="color: #1a1a1a; font-weight: bold;">+1 (929) 689-1990</a>.
+                For immediate shopping assistance, email us directly at: <a href="mailto:${adminEmail}" style="color: #1a1a1a; font-weight: bold;">${adminEmail}</a>.
               </p>
             </div>
 
@@ -210,7 +210,6 @@ export const handler: Handler = async (event) => {
                 </p>
                 <ul style="font-size: 13px; line-height: 1.8; color: #333; margin-top: 10px; padding-left: 20px;">
                   <li>Email: <a href="mailto:${adminEmail}" style="color: #1a1a1a; font-weight: bold;">${adminEmail}</a></li>
-                  <li>WhatsApp / Phone: <a href="tel:+19296891990" style="color: #1a1a1a; font-weight: bold;">+1 (929) 689-1990</a></li>
                 </ul>
               </div>
 

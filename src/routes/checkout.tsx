@@ -49,7 +49,6 @@ function CheckoutPage() {
             </p>
             <ul className="text-xs text-gray-700 space-y-1.5 pt-1 font-medium">
               <li>✉️ Email Support: <a href="mailto:support@marchell0thejeweler.com" className="text-black underline font-semibold">support@marchell0thejeweler.com</a></li>
-              <li>💬 WhatsApp Support: <a href="https://wa.me/19296891990" className="text-black underline font-semibold">+1 (929) 689-1990</a></li>
             </ul>
           </div>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -303,11 +302,10 @@ function CheckoutForm({
         <div className="p-5 bg-gray-50 border border-gray-200 rounded text-left space-y-3 mb-8">
           <h3 className="font-medium text-gray-900 text-sm">Next Steps for Order Completion:</h3>
           <p className="text-xs text-gray-600 leading-relaxed">
-            Please get in touch with our support team to verify details and complete order processing. You can send a direct inquiry on our Contact page or reach us via email or WhatsApp:
+            Please get in touch with our support team to verify details and complete order processing. You can send a direct inquiry on our Contact page or reach us via email:
           </p>
           <ul className="text-xs text-gray-700 space-y-1.5 font-medium pt-1">
             <li>✉️ Email Support: <a href="mailto:support@marchell0thejeweler.com" className="text-black underline font-semibold">support@marchell0thejeweler.com</a></li>
-            <li>💬 WhatsApp Support: <a href="https://wa.me/19296891990" className="text-black underline font-semibold">+1 (929) 689-1990</a></li>
           </ul>
         </div>
 

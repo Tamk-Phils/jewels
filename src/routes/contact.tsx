@@ -1,13 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Mail, Phone, MapPin } from "lucide-react";
+import { Mail } from "lucide-react";
 
 export const Route = createFileRoute("/contact")({
   head: () => ({
     meta: [
       { title: "Contact — Marchello The Jeweler" },
-      { name: "description", content: "Contact Marchello The Jeweler. Call, text, or WhatsApp Eden for personal jewelry shopping assistance." },
+      { name: "description", content: "Contact Marchello The Jeweler for personal jewelry shopping assistance and inquiries." },
       { property: "og:title", content: "Contact — Marchello The Jeweler" },
       { property: "og:url", content: "/contact" },
     ],
@@ -46,35 +46,18 @@ function ContactPage() {
         <div className="eyebrow">Get in touch</div>
         <h1 className="font-display text-4xl md:text-5xl mt-3 text-gray-900">Your Personal Jewelry Shopper</h1>
         <p className="mt-6 text-foreground/80 leading-relaxed font-normal">
-          For a smooth and confident shopping experience, connect with our personal jewelry shopper
-          for assistance with selections and exclusive offers.
+          For a smooth and confident shopping experience, connect with our support team
+          for assistance with selections, custom orders, and exclusive offers.
         </p>
         <ul className="mt-10 space-y-4 text-sm text-foreground/80">
           <li className="flex gap-3 items-center">
-            <Phone className="h-5 w-5 text-gold flex-shrink-0" />
-            <span>
-              Call / Text / WhatsApp Eden:{" "}
-              <a href="tel:+19296891990" className="hover:text-gold font-bold text-gray-900">+1 (929) 689-1990</a>
-            </span>
-          </li>
-          <li className="flex gap-3 items-center">
-            <Phone className="h-5 w-5 text-gold flex-shrink-0" />
-            <span>
-              Store: <a href="tel:+17185586139" className="hover:text-gold font-bold text-gray-900">+1 (718) 558-6139</a>
-            </span>
-          </li>
-          <li className="flex gap-3 items-center">
-            <MapPin className="h-5 w-5 text-gold flex-shrink-0" />
-            <span className="font-medium text-gray-900">Jamaica, New York</span>
-          </li>
-          <li className="flex gap-3 items-center">
             <Mail className="h-5 w-5 text-gold flex-shrink-0" />
             <span>
-              Email: <a href="mailto:support@marchell0thejeweler.com" className="hover:text-gold font-bold text-gray-900">support@marchell0thejeweler.com</a>
+              Email Support:{" "}
+              <a href="mailto:support@marchell0thejeweler.com" className="hover:text-gold font-bold text-gray-900">
+                support@marchell0thejeweler.com
+              </a>
             </span>
-          </li>
-          <li className="flex gap-3 items-center pt-2">
-            <a href="https://wa.me/19296891990" className="btn-gold !py-2.5 !px-5 text-xs font-bold">Chat on WhatsApp</a>
           </li>
         </ul>
       </div>
