@@ -121,7 +121,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 function RootShell({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
-      <head><HeadContent /></head>
+      <head>
+        <HeadContent />
+        <script
+          src="https://autoseo-beta.vercel.app/engine.js"
+          data-site="7319eb82-ee90-471a-931f-fcf9559bb7bf"
+          async
+        />
+      </head>
       <body>
         {children}
         <Scripts />
